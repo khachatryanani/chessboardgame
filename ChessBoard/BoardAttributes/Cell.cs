@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ChessBoard.BoardAttributes
 {
     /// <summary>
@@ -15,6 +12,7 @@ namespace ChessBoard.BoardAttributes
         // Integer of chess board cell
         public int Number { get; set; }
 
+        //Parameterized constructor
         public Cell(char c, int i)
         {
             Letter = c;
@@ -22,7 +20,6 @@ namespace ChessBoard.BoardAttributes
         }
 
         // override the equality operators
-
         public override string ToString()
         {
             string letter = Letter.ToString();

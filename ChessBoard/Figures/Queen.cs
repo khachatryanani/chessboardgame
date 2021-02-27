@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using ChessBoard.BoardAttributes;
 
 namespace ChessBoard.Figures
@@ -10,6 +8,7 @@ namespace ChessBoard.Figures
     /// </summary>
     public class Queen : Figure
     {
+        // Parameterized constructor
         public Queen(Cell cell, Color color) : base(cell, color)
         {
 
@@ -18,7 +17,7 @@ namespace ChessBoard.Figures
         /// <summary>
         /// Get all the cells under influence of Queen on the current Cell
         /// </summary>
-        /// <returns>List of Cells under influance of Rook on the current Cell</returns>
+        /// <returns>List of Cells under influance of Queen on the current Cell</returns>
         protected override List<Cell> GetInfluencedCells()
         {
             List<Cell> cells = new List<Cell>();

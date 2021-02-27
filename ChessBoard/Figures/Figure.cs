@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using ChessBoard.BoardAttributes;
 using ChessBoard.Extensions;
 
 namespace ChessBoard.Figures
 {
     /// <summary>
-    /// Base class of Chess Figures, contains the main figure properties, defines some virtual methodes to be overriden in derived classes
+    /// Base class of Chess Figures, contains the figures' main properties and methods
     /// </summary>
     public class Figure
     {
+        // Holds the current location of figure on the chessboard
         public Cell CurrentCell { get; private set; }
 
+        // Color of the figure
         public Color Color { get; set; }
 
         // Cells on ChessBoard that are falling under the influence of current figure. 
-        //Also, this are the cells that the current figure can move to.
+        //Also, this are the cells that the current figure is able to move to.
         public List<Cell> InfluencedCells { get; set; }
 
+        // Parameterized constructor
         public Figure(Cell cell, Color color)
         {
             CurrentCell = cell;
@@ -30,13 +32,11 @@ namespace ChessBoard.Figures
         /// Check is the speified Cell is one of the influenced cells of the current figure and moves to it
         /// </summary>
         /// <param name="cell">Cell to move to</param>
-        /// <returns>True if the figure moved to, false if no movement occured</returns>
         public void Move(Cell cell)
         {
             if (!InfluencedCells.ContainsCell(cell))
             {
                 Console.WriteLine($"Cell is out of reach for your figure.");
-
             }
 
             CurrentCell = cell;

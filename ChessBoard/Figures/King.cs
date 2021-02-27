@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using ChessBoard.BoardAttributes;
 
 namespace ChessBoard.Figures
@@ -10,6 +8,7 @@ namespace ChessBoard.Figures
     /// </summary>
     public class King : Figure
     {
+        // Parameterized constructor
         public King(Cell cell, Color color) : base(cell, color)
         {
 
@@ -38,7 +37,5 @@ namespace ChessBoard.Figures
             }
             return cells;
         }
-
-
     }
 }

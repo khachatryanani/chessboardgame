@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
 using ChessBoard.Extensions;
@@ -8,13 +6,13 @@ using ChessBoard.Extensions;
 namespace ChessBoard
 {
     /// <summary>
-    /// ChessBoard class is responsible vor maintaining and displaying all the information on available figures on the board, 
-    /// their locations and checks their moves.
+    /// ChessBoard class is responsible vor maintaining and displaying all the information on available figures on the board 
+    /// their locations and verifies their moves.
     /// </summary>
     public static class ChessBoardManager
     {
         // Container for all the available figures on the board
-        public static readonly Board board = new Board();
+        private static readonly Board _board = new Board();
 
         /// <summary>
         /// ChessManager can add figures to the board
@@ -24,7 +22,7 @@ namespace ChessBoard
         {
             // String representation of the Cell object is the Key in board container
             string cell = figure.CurrentCell.ToString();
-            board[cell] = figure;
+            _board[cell] = figure;
         }
 
         /// <summary>
@@ -34,7 +32,7 @@ namespace ChessBoard
         /// <returns>True if the given cell is free to move to, false if its already occupied</returns>
         public static bool IsFreeCell(Cell cellTomove)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.CurrentCell == cellTomove)
                 {
@@ -45,14 +43,14 @@ namespace ChessBoard
         }
 
         /// <summary>
-        /// Checks if the given cell might be under the check of opposite figures
+        /// Checks if the given cell might be under the Check of opposite figures
         /// </summary>
-        /// <param name="cellToMove">Cell to check the inffluance for</param>
+        /// <param name="cellToMove">Cell to verify for Chess Check</param>
         /// <param name="colorOfPlayer">Color of current player</param>
-        /// <returns></returns>
+        /// <returns>True if the given cell falls under Check of opposite figures, False if it does not</returns>
         public static bool IsUnderCheckCell(Cell cellToMove, Color colorOfPlayer)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.InfluencedCells.ContainsCell(cellToMove) && item.Color != colorOfPlayer)
                 {
@@ -65,17 +63,15 @@ namespace ChessBoard
             return false;
         }
 
-
-        // TODO
         /// <summary>
         /// Checks if the current cell falls under an influence of any of opposite figure
         /// </summary>
         /// <param name="cellToCheck">Cell to check if there is an influence on</param>
-        /// <param name="colorOfPlayer"></param>
-        /// <returns></returns>
+        /// <param name="colorOfPlayer">Color of the current player</param>
+        /// <returns>True if the cell is in the influeneced cells of the opposite player, False if it does not</returns>
         public static bool IsInfluencedCell(Cell cellToCheck, Color colorOfPlayer)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.InfluencedCells.ContainsCell(cellToCheck) && item.Color != colorOfPlayer)
                 {
@@ -145,9 +141,11 @@ namespace ChessBoard
                 Cell cell;
                 if (numberMoveFrom < numberMoveTo)
                 {
+                    // Checks if the path from cell to move from to cell to move to is completle free
                     for (int i = numberMoveFrom + 1; i < numberMoveTo; i++)
                     {
                         cell = new Cell(figure.CurrentCell.Letter, i);
+                      
                         if (!IsFreeCell(cell))
                         {
                             return false;
@@ -173,6 +171,7 @@ namespace ChessBoard
                 Cell cell;
                 if (letterMoveFrom < letterMoveTo)
                 {
+                    // Checks if the path from cell to move from to cell to move to is completle free
                     for (int i = letterMoveFrom + 1; i < letterMoveTo; i++)
                     {
                         cell = new Cell((char)i, numberMoveFrom);
@@ -202,6 +201,7 @@ namespace ChessBoard
                 if (numberMoveFrom > numberMoveTo && letterMoveFrom > letterMoveTo)
                 {
                     Cell cell;
+                    // Checks if the path from cell to move from to cell to move to is completle free
                     for (int i = numberMoveFrom - 1, j = letterMoveFrom - 1; i > numberMoveTo && j > letterMoveTo; i--, j--)
                     {
                         cell = new Cell((char)j, i);
@@ -216,6 +216,7 @@ namespace ChessBoard
                 else if (numberMoveFrom > numberMoveTo && letterMoveFrom < letterMoveTo)
                 {
                     Cell cell;
+                    // Checks if the path from cell to move from to cell to move to is completle free
                     for (int i = numberMoveFrom - 1, j = letterMoveFrom + 1; i > numberMoveTo && j < letterMoveTo; i--, j++)
                     {
                         cell = new Cell((char)j, i);
@@ -230,6 +231,7 @@ namespace ChessBoard
                 else if (numberMoveFrom < numberMoveTo && letterMoveFrom > letterMoveTo)
                 {
                     Cell cell;
+                    // Checks if the path from cell to move from to cell to move to is completle free
                     for (int i = numberMoveFrom + 1, j = letterMoveFrom - 1; i < numberMoveTo && j > letterMoveTo; i++, j--)
                     {
                         cell = new Cell((char)j, i);
@@ -244,6 +246,7 @@ namespace ChessBoard
                 else
                 {
                     Cell cell;
+                    // Checks if the path from cell to move from to cell to move to is completle free
                     for (int i = numberMoveFrom + 1, j = letterMoveFrom + 1; i < numberMoveTo && j < letterMoveTo; i++, j++)
                     {
                         cell = new Cell((char)j, i);
@@ -262,10 +265,10 @@ namespace ChessBoard
         /// </summary>
         /// <param name="cellOfFigure"></param>
         /// <param name="colorOfFigure"></param>
-        /// <returns></returns>
+        /// <returns>The Figure object from the chess board container</returns>
         public static Figure GetFigureByCell(Cell cellOfFigure)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.CurrentCell == cellOfFigure)
                 {
@@ -283,7 +286,7 @@ namespace ChessBoard
         /// <returns>King object if found, null if not</returns>
         public static King GetTheKing(Color colorOfKing)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.GetType() == typeof(King) && item.Color == colorOfKing)
                 {
@@ -300,10 +303,10 @@ namespace ChessBoard
         /// <param name="typeOfFigure">Type of the figure to get</param>
         /// <param name="colorofFigure">Color of figure to get</param>
         /// <param name="order">Gives the figure of the order if there are more than one figures of a type</param>
-        /// <returns>Figure object</returns>
+        /// <returns>Figure object from the chess board container</returns>
         public static Figure GetFigure(Type typeOfFigure, Color colorofFigure, int order = 1)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.GetType() == typeOfFigure && item.Color == colorofFigure)
                 {
@@ -327,9 +330,9 @@ namespace ChessBoard
             string oldCell = movedFrom.ToString();
             string newCell = movedTo.ToString();
 
-            Figure temp = board[oldCell];
-            board.Remove(oldCell);
-            board[newCell] = temp;
+            Figure temp = _board[oldCell];
+            _board.Remove(oldCell);
+            _board[newCell] = temp;
         }
 
         /// <summary>
@@ -350,15 +353,15 @@ namespace ChessBoard
                 for (int j = 0; j < 8; j++)
                 {
                     string cell = ConvertIndexesToCell(i, j);
-                    if (board[cell] == null)
+                    if (_board[cell] == null)
                     {
                         Console.Write("  | ");
                     }
                     else
                     {
                         // Get the first letter of figure type as an icon to display in Console.
-                        string icon = board[cell].GetType().Name.Substring(0, 1);
-                        Color color = board[cell].Color;
+                        string icon = _board[cell].GetType().Name.Substring(0, 1);
+                        Color color = _board[cell].Color;
                         //Change the Console Forground Color based on the Figure color (Red for Blacks and White for Whites)
                         if (color == Color.White)
                         {
@@ -409,39 +412,13 @@ namespace ChessBoard
         /// </summary>
         /// <param name="i"></param>
         /// <param name="j"></param>
-        /// <returns>location string of a chess board</returns>
+        /// <returns>Chessboard cell string representation</returns>
         private static string ConvertIndexesToCell(int i, int j)
         {
             string number = (i + 1).ToString();
             char letter = (char)(72 - j);
 
             return letter + number;
-        }
-
-        public static int GetQuarterOfCell(Cell cell) 
-        {
-            if (cell.Letter >= 65 && cell.Letter <= 68)
-            {
-                if (cell.Number >= 1 && cell.Number <= 4)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 3;
-                }
-            }
-            else 
-            {
-                if (cell.Number >= 1 && cell.Number <= 4)
-                {
-                    return 2;
-                }
-                else
-                {
-                    return 4;
-                }
-            }
         }
     }
 

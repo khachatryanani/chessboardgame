@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ChessBoard.BoardAttributes
 {
     /// <summary>
-    /// Represents a color in chess
+    /// Represents a color in chessboard
     /// </summary>
     public enum Color
     {

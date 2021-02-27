@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using ChessBoard.BoardAttributes;
-using ChessBoard.Figures;
 
 namespace ChessBoard.Figures
 {
@@ -11,6 +8,7 @@ namespace ChessBoard.Figures
     /// </summary>
     public class Rook : Figure
     {
+        // Parameterized constructor
         public Rook(Cell cell, Color color) : base(cell, color)
         {
 
