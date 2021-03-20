@@ -12,7 +12,7 @@ namespace ChessBoard
     public static class ChessBoardManager
     {
         // Container for all the available figures on the board
-        private static readonly Board _board = new Board();
+        private static readonly Board board = new Board();
 
         /// <summary>
         /// ChessManager can add figures to the board
@@ -22,7 +22,7 @@ namespace ChessBoard
         {
             // String representation of the Cell object is the Key in board container
             string cell = figure.CurrentCell.ToString();
-            _board[cell] = figure;
+            board[cell] = figure;
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace ChessBoard
         /// <returns>True if the given cell is free to move to, false if its already occupied</returns>
         public static bool IsFreeCell(Cell cellTomove)
         {
-            foreach (var item in _board)
+            foreach (var item in board)
             {
                 if (item.CurrentCell == cellTomove)
                 {
@@ -50,7 +50,7 @@ namespace ChessBoard
         /// <returns>True if the given cell falls under Check of opposite figures, False if it does not</returns>
         public static bool IsUnderCheckCell(Cell cellToMove, Color colorOfPlayer)
         {
-            foreach (var item in _board)
+            foreach (var item in board)
             {
                 if (item.InfluencedCells.ContainsCell(cellToMove) && item.Color != colorOfPlayer)
                 {
@@ -71,10 +71,14 @@ namespace ChessBoard
         /// <returns>True if the cell is in the influeneced cells of the opposite player, False if it does not</returns>
         public static bool IsInfluencedCell(Cell cellToCheck, Color colorOfPlayer)
         {
-            foreach (var item in _board)
+            foreach (var item in board)
             {
                 if (item.InfluencedCells.ContainsCell(cellToCheck) && item.Color != colorOfPlayer)
                 {
+                    //if (IsPossibleToMove(item, cellToCheck))
+                    //{
+                    //    return true;
+                    //}
                     return true;
                 }
             }
@@ -141,7 +145,7 @@ namespace ChessBoard
                 Cell cell;
                 if (numberMoveFrom < numberMoveTo)
                 {
-                    // Checks if the path from cell to move from to cell to move to is completle free
+                    // Checks if the path from cell to move from to cell to move to is completly free
                     for (int i = numberMoveFrom + 1; i < numberMoveTo; i++)
                     {
                         cell = new Cell(figure.CurrentCell.Letter, i);
@@ -268,7 +272,7 @@ namespace ChessBoard
         /// <returns>The Figure object from the chess board container</returns>
         public static Figure GetFigureByCell(Cell cellOfFigure)
         {
-            foreach (var item in _board)
+            foreach (var item in board)
             {
                 if (item.CurrentCell == cellOfFigure)
                 {
@@ -286,7 +290,7 @@ namespace ChessBoard
         /// <returns>King object if found, null if not</returns>
         public static King GetTheKing(Color colorOfKing)
         {
-            foreach (var item in _board)
+            foreach (var item in board)
             {
                 if (item.GetType() == typeof(King) && item.Color == colorOfKing)
                 {
@@ -306,7 +310,7 @@ namespace ChessBoard
         /// <returns>Figure object from the chess board container</returns>
         public static Figure GetFigure(Type typeOfFigure, Color colorofFigure, int order = 1)
         {
-            foreach (var item in _board)
+            foreach (var item in board)
             {
                 if (item.GetType() == typeOfFigure && item.Color == colorofFigure)
                 {
@@ -330,9 +334,9 @@ namespace ChessBoard
             string oldCell = movedFrom.ToString();
             string newCell = movedTo.ToString();
 
-            Figure temp = _board[oldCell];
-            _board.Remove(oldCell);
-            _board[newCell] = temp;
+            Figure temp = board[oldCell];
+            board.Remove(oldCell);
+            board[newCell] = temp;
         }
 
         /// <summary>
@@ -353,15 +357,15 @@ namespace ChessBoard
                 for (int j = 0; j < 8; j++)
                 {
                     string cell = ConvertIndexesToCell(i, j);
-                    if (_board[cell] == null)
+                    if (board[cell] == null)
                     {
                         Console.Write("  | ");
                     }
                     else
                     {
                         // Get the first letter of figure type as an icon to display in Console.
-                        string icon = _board[cell].GetType().Name.Substring(0, 1);
-                        Color color = _board[cell].Color;
+                        string icon = board[cell].GetType().Name.Substring(0, 1);
+                        Color color = board[cell].Color;
                         //Change the Console Forground Color based on the Figure color (Red for Blacks and White for Whites)
                         if (color == Color.White)
                         {
@@ -388,6 +392,78 @@ namespace ChessBoard
         /// </summary>
         /// <param name="userResponse">User input string</param>
         /// <returns>Valid Cell object</returns>
+
+        public static void DrawOneFigureBoard() 
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            // Print the heading of the board
+            Console.WriteLine("    H   G   F   E   D   C   B   A   ");
+            Console.WriteLine("  +---+---+---+---+---+---+---+---+");
+
+            for (int i = 0; i < 8; i++)
+            {
+                Console.Write($"{i + 1} | ");
+
+                for (int j = 0; j < 8; j++)
+                {
+                    string cell = ConvertIndexesToCell(i, j);
+                    if (board[cell] == null)
+                    {
+                        bool isInfluenecedCell = false;
+                        foreach (var item in board)
+                        {
+                            foreach (var influencedCell in item.InfluencedCells)
+                            {
+                                if (cell.Equals(influencedCell.ToString()))
+                                {
+                                    isInfluenecedCell = true;
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                    Console.Write("*");
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.Write(" | ");
+
+                                    break;
+                                }
+                            }
+                        }
+                        if (!isInfluenecedCell) 
+                        {
+                            Console.Write("  | ");
+                        }
+                        
+                    }
+                    else
+                    {
+                        // Get the first letter of figure type as an icon to display in Console.
+                        string icon = board[cell].GetType().Name.Substring(0, 1);
+                        Color color = board[cell].Color;
+                        //Change the Console Forground Color based on the Figure color (Red for Blacks and White for Whites)
+                        if (color == Color.White)
+                        {
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                        }
+
+                        Console.Write(icon);
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write(" | ");
+                    }
+                }
+
+                Console.Write("\n");
+                Console.WriteLine("  +---+---+---+---+---+---+---+---+");
+            }
+        }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="userResponse"></param>
+      /// <returns></returns>
         public static Cell ConvertToValidCell(string userResponse)
         {
             if (userResponse.Length != 2)

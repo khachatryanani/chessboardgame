@@ -8,7 +8,7 @@ namespace ChessBoard.Figures
     /// <summary>
     /// Base class of Chess Figures, contains the figures' main properties and methods
     /// </summary>
-    public class Figure
+    public abstract class Figure
     {
         // Holds the current location of figure on the chessboard
         public Cell CurrentCell { get; private set; }
@@ -43,7 +43,6 @@ namespace ChessBoard.Figures
 
             // Based on every new Cell location, determine what are the new cells of influence zone
             InfluencedCells = GetInfluencedCells();
-            //return true;
         }
 
         /// <summary>
@@ -52,9 +51,6 @@ namespace ChessBoard.Figures
         /// </summary>
         /// <param name="currentCell">Current location of the figure</param>
         /// <returns>A list of cells falling under influence of the current figure</returns>
-        protected virtual List<Cell> GetInfluencedCells()
-        {
-            throw new NotImplementedException();
-        }
+        protected abstract List<Cell> GetInfluencedCells();
     }
 }

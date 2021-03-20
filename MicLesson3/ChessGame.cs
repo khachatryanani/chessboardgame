@@ -13,12 +13,18 @@ namespace ChessGameManager
             {
                 new KeyValuePair<Color, Type>(Color.White, typeof(Queen)),
                 new KeyValuePair<Color, Type>(Color.White, typeof(Rook)),
-                new KeyValuePair<Color, Type>(Color.White, typeof(Rook)),
                 new KeyValuePair<Color, Type>(Color.White, typeof(King)),
                 new KeyValuePair<Color, Type>(Color.Black, typeof(King))
             };
 
-            ChessManager.Run(Color.Black, figures);
+           
+            var knight = new List<KeyValuePair<Color, Type>>()
+            {
+                new KeyValuePair<Color, Type>(Color.White, typeof(Knight)),
+            };
+
+            ChessManager.RunWinningAlgorithm(Color.Black, figures);
+            //ChessManager.RunKnightAlgorithm(knight);
         }
     }
 }
