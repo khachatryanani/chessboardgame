@@ -9,7 +9,7 @@ namespace ChessBoard.Figures
     public class Queen : Figure
     {
         // Parameterized constructor
-        public Queen(Cell cell, Color color) : base(cell, color)
+        public Queen(Cell cell, CellColor color) : base(cell, color)
         {
 
         }

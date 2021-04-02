@@ -19,6 +19,14 @@ namespace ChessBoard.BoardAttributes
             Number = i;
         }
 
+        public Cell(string cellString)
+        {
+            Letter = cellString[0];
+            Number = (int)cellString[1] - 48;
+        }
+        public Cell() 
+        {
+        }
         // override the equality operators
         public override string ToString()
         {

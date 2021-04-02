@@ -12,7 +12,7 @@ namespace ChessBoard
     public static class ChessBoardManager
     {
         // Container for all the available figures on the board
-        private static readonly Board board = new Board();
+        private static readonly Board _board = new Board();
 
         /// <summary>
         /// ChessManager can add figures to the board
@@ -22,7 +22,7 @@ namespace ChessBoard
         {
             // String representation of the Cell object is the Key in board container
             string cell = figure.CurrentCell.ToString();
-            board[cell] = figure;
+            _board[cell] = figure;
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace ChessBoard
         /// <returns>True if the given cell is free to move to, false if its already occupied</returns>
         public static bool IsFreeCell(Cell cellTomove)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.CurrentCell == cellTomove)
                 {
@@ -48,16 +48,22 @@ namespace ChessBoard
         /// <param name="cellToMove">Cell to verify for Chess Check</param>
         /// <param name="colorOfPlayer">Color of current player</param>
         /// <returns>True if the given cell falls under Check of opposite figures, False if it does not</returns>
-        public static bool IsUnderCheckCell(Cell cellToMove, Color colorOfPlayer)
+        public static bool IsUnderCheckCell(Cell cellToMove, CellColor colorOfPlayer)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.InfluencedCells.ContainsCell(cellToMove) && item.Color != colorOfPlayer)
                 {
+                    King king = GetTheKing(colorOfPlayer);
+                    Cell kingCell = king.CurrentCell;
+                    Cell placeHolder = new Cell();
+                    king.Move(placeHolder);
                     if (IsPossibleToMove(item, cellToMove))
                     {
+                        king.Move(kingCell);
                         return true;
                     }
+                    king.Move(kingCell);
                 }
             }
             return false;
@@ -69,56 +75,61 @@ namespace ChessBoard
         /// <param name="cellToCheck">Cell to check if there is an influence on</param>
         /// <param name="colorOfPlayer">Color of the current player</param>
         /// <returns>True if the cell is in the influeneced cells of the opposite player, False if it does not</returns>
-        public static bool IsInfluencedCell(Cell cellToCheck, Color colorOfPlayer)
+        public static bool IsInfluencedCell(Cell cellToCheck, CellColor colorOfPlayer)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.InfluencedCells.ContainsCell(cellToCheck) && item.Color != colorOfPlayer)
                 {
-                    //if (IsPossibleToMove(item, cellToCheck))
-                    //{
-                    //    return true;
-                    //}
                     return true;
                 }
             }
             return false;
         }
 
-        /// <summary>
-        /// Checks if the given cell for the given figure is free to stand in
-        /// </summary>
-        /// <param name="cell">Cell to check</param>
-        /// <param name="figureType">Figure to check the cell for</param>
-        /// <param name="color">Color of figure to check the cell for</param>
-        /// <returns>True if cell is acceptable for the given figure, False if not</returns>
-        public static bool IsAcceptableCell(Cell cell, Type figureType, Color color)
-        {
-            if (IsFreeCell(cell))
-            {
-                if (figureType == typeof(King))
-                {
-                    if (!IsUnderCheckCell(cell, color))
-                    {
-                        King king = new King(cell, color);
-                        foreach (var item in king.InfluencedCells)
-                        {
-                            if (!IsUnderCheckCell(item, color) && item != king.CurrentCell)
-                            {
-                                return true;
-                            }
-                        }
-                        Console.WriteLine("This will cause a stalemate!");
-                        return false;
-                    }
-                    Console.WriteLine("King will be under check!");
-                    return false;
-                }
-                return true;
-            }
-            Console.WriteLine("There is already a figure in this cell!");
-            return false;
-        }
+        ///// <summary>
+        ///// Checks if the given cell for the given figure is free to stand in
+        ///// </summary>
+        ///// <param name="cell">Cell to check</param>
+        ///// <param name="figureType">Figure to check the cell for</param>
+        ///// <param name="color">Color of figure to check the cell for</param>
+        ///// <returns>True if cell is acceptable for the given figure, False if not</returns>
+        //public static bool IsAcceptableCell(Cell cell, Type figureType, CellColor color, out string error)
+        //{
+        //    if (IsFreeCell(cell))
+        //    {
+        //        if (figureType == typeof(King))
+        //        {
+        //            King king = new King(cell, color);
+
+        //            if (!IsUnderCheckCell(cell, color))
+        //            {
+        //                var rook = GetFigure(typeof(Rook), CellColor.White) as Rook;
+        //                if (Math.Abs(rook.CurrentCell.Letter - cell.Letter) == 1 && Math.Abs(rook.CurrentCell.Number - cell.Number) == 1) 
+        //                {
+        //                    error = "King will be near rook! Don't do this.";
+        //                    return false;
+        //                }
+        //                foreach (var item in king.InfluencedCells)
+        //                {
+        //                    if (!IsUnderCheckCell(item, color) && item != king.CurrentCell)
+        //                    {
+        //                        error = string.Empty;
+        //                        return true;
+        //                    }
+        //                }
+        //                error = "This will cause a stalemate!";
+        //                return false;
+        //            }
+        //            error = "King will be under check!";
+        //            return false;
+        //        }
+        //        error = string.Empty;
+        //        return true;
+        //    }
+        //    error = "There is already a figure in this cell!";
+        //    return false;
+        //}
 
         /// <summary>
         /// Checks if the given figure can move to the given cell: if it is free and if the path to reach it is also free
@@ -149,7 +160,7 @@ namespace ChessBoard
                     for (int i = numberMoveFrom + 1; i < numberMoveTo; i++)
                     {
                         cell = new Cell(figure.CurrentCell.Letter, i);
-                      
+
                         if (!IsFreeCell(cell))
                         {
                             return false;
@@ -201,66 +212,128 @@ namespace ChessBoard
             //Moving by diaganal
             else
             {
-                //Case1: up-right
-                if (numberMoveFrom > numberMoveTo && letterMoveFrom > letterMoveTo)
+                switch (numberMoveFrom > numberMoveTo)
                 {
-                    Cell cell;
-                    // Checks if the path from cell to move from to cell to move to is completle free
-                    for (int i = numberMoveFrom - 1, j = letterMoveFrom - 1; i > numberMoveTo && j > letterMoveTo; i--, j--)
-                    {
-                        cell = new Cell((char)j, i);
-                        if (!IsFreeCell(cell))
+                    //Case1: up-right
+                    //Case2: up-left
+                    case true when letterMoveFrom > letterMoveTo:
                         {
-                            return false;
+                            // Checks if the path from cell to move from to cell to move to is completely free
+                            for (int i = numberMoveFrom - 1, j = letterMoveFrom - 1; i > numberMoveTo && j > letterMoveTo; i--, j--)
+                            {
+                                var cell = new Cell((char)j, i);
+                                if (!IsFreeCell(cell))
+                                {
+                                    return false;
+                                }
+                            }
+                            return true;
                         }
-                    }
-                    return true;
-                }
-                //Case2: up-left
-                else if (numberMoveFrom > numberMoveTo && letterMoveFrom < letterMoveTo)
-                {
-                    Cell cell;
-                    // Checks if the path from cell to move from to cell to move to is completle free
-                    for (int i = numberMoveFrom - 1, j = letterMoveFrom + 1; i > numberMoveTo && j < letterMoveTo; i--, j++)
-                    {
-                        cell = new Cell((char)j, i);
-                        if (!IsFreeCell(cell))
+                    //Case3: down-right
+                    case true when letterMoveFrom < letterMoveTo:
                         {
-                            return false;
+                            // Checks if the path from cell to move from to cell to move to is completely free
+                            for (int i = numberMoveFrom - 1, j = letterMoveFrom + 1; i > numberMoveTo && j < letterMoveTo; i--, j++)
+                            {
+                                var cell = new Cell((char)j, i);
+                                if (!IsFreeCell(cell))
+                                {
+                                    return false;
+                                }
+                            }
+                            return true;
                         }
-                    }
-                    return true;
-                }
-                //Case3: down-right
-                else if (numberMoveFrom < numberMoveTo && letterMoveFrom > letterMoveTo)
-                {
-                    Cell cell;
-                    // Checks if the path from cell to move from to cell to move to is completle free
-                    for (int i = numberMoveFrom + 1, j = letterMoveFrom - 1; i < numberMoveTo && j > letterMoveTo; i++, j--)
-                    {
-                        cell = new Cell((char)j, i);
-                        if (!IsFreeCell(cell))
+                    default:
                         {
-                            return false;
+                            if (numberMoveFrom < numberMoveTo && letterMoveFrom > letterMoveTo)
+                            {
+                                // Checks if the path from cell to move from to cell to move to is completely free
+                                for (int i = numberMoveFrom + 1, j = letterMoveFrom - 1; i < numberMoveTo && j > letterMoveTo; i++, j--)
+                                {
+                                    var cell = new Cell((char)j, i);
+                                    if (!IsFreeCell(cell))
+                                    {
+                                        return false;
+                                    }
+                                }
+                                return true;
+                            }
+                            //Case4: down-left
+                            else
+                            {
+                                // Checks if the path from cell to move from to cell to move to is completely free
+                                for (int i = numberMoveFrom + 1, j = letterMoveFrom + 1; i < numberMoveTo && j < letterMoveTo; i++, j++)
+                                {
+                                    var cell = new Cell((char)j, i);
+                                    if (!IsFreeCell(cell))
+                                    {
+                                        return false;
+                                    }
+                                }
+                                return true;
+                            }
                         }
-                    }
-                    return true;
                 }
-                //Case4: down-left
-                else
-                {
-                    Cell cell;
-                    // Checks if the path from cell to move from to cell to move to is completle free
-                    for (int i = numberMoveFrom + 1, j = letterMoveFrom + 1; i < numberMoveTo && j < letterMoveTo; i++, j++)
-                    {
-                        cell = new Cell((char)j, i);
-                        if (!IsFreeCell(cell))
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
+                ////Case1: up-right
+                //if (numberMoveFrom > numberMoveTo && letterMoveFrom > letterMoveTo)
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom - 1; i > numberMoveTo && j > letterMoveTo; i--, j--)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
+                ////Case2: up-left
+                //else if (numberMoveFrom > numberMoveTo && letterMoveFrom < letterMoveTo)
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom + 1; i > numberMoveTo && j < letterMoveTo; i--, j++)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
+                ////Case3: down-right
+                //else if (numberMoveFrom < numberMoveTo && letterMoveFrom > letterMoveTo)
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom - 1; i < numberMoveTo && j > letterMoveTo; i++, j--)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
+                ////Case4: down-left
+                //else
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom + 1; i < numberMoveTo && j < letterMoveTo; i++, j++)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
             }
         }
 
@@ -272,7 +345,7 @@ namespace ChessBoard
         /// <returns>The Figure object from the chess board container</returns>
         public static Figure GetFigureByCell(Cell cellOfFigure)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.CurrentCell == cellOfFigure)
                 {
@@ -288,9 +361,9 @@ namespace ChessBoard
         /// </summary>
         /// <param name="colorOfKing">Color of King object to return</param>
         /// <returns>King object if found, null if not</returns>
-        public static King GetTheKing(Color colorOfKing)
+        public static King GetTheKing(CellColor colorOfKing)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.GetType() == typeof(King) && item.Color == colorOfKing)
                 {
@@ -308,9 +381,9 @@ namespace ChessBoard
         /// <param name="colorofFigure">Color of figure to get</param>
         /// <param name="order">Gives the figure of the order if there are more than one figures of a type</param>
         /// <returns>Figure object from the chess board container</returns>
-        public static Figure GetFigure(Type typeOfFigure, Color colorofFigure, int order = 1)
+        public static Figure GetFigure(Type typeOfFigure, CellColor colorofFigure, int order = 1)
         {
-            foreach (var item in board)
+            foreach (var item in _board)
             {
                 if (item.GetType() == typeOfFigure && item.Color == colorofFigure)
                 {
@@ -334,168 +407,9 @@ namespace ChessBoard
             string oldCell = movedFrom.ToString();
             string newCell = movedTo.ToString();
 
-            Figure temp = board[oldCell];
-            board.Remove(oldCell);
-            board[newCell] = temp;
-        }
-
-        /// <summary>
-        /// Based on the array of Figures and their Figure type displays the board in Console.
-        /// </summary>
-        public static void DrawBoard()
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-
-            // Print the heading of the board
-            Console.WriteLine("    H   G   F   E   D   C   B   A   ");
-            Console.WriteLine("  +---+---+---+---+---+---+---+---+");
-
-            for (int i = 0; i < 8; i++)
-            {
-                Console.Write($"{i + 1} | ");
-
-                for (int j = 0; j < 8; j++)
-                {
-                    string cell = ConvertIndexesToCell(i, j);
-                    if (board[cell] == null)
-                    {
-                        Console.Write("  | ");
-                    }
-                    else
-                    {
-                        // Get the first letter of figure type as an icon to display in Console.
-                        string icon = board[cell].GetType().Name.Substring(0, 1);
-                        Color color = board[cell].Color;
-                        //Change the Console Forground Color based on the Figure color (Red for Blacks and White for Whites)
-                        if (color == Color.White)
-                        {
-                            Console.ForegroundColor = ConsoleColor.White;
-                        }
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                        }
-
-                        Console.Write(icon);
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(" | ");
-                    }
-                }
-
-                Console.Write("\n");
-                Console.WriteLine("  +---+---+---+---+---+---+---+---+");
-            }
-        }
-
-        /// <summary>
-        /// Converts user input string to Cell object and returns it. Returns Null if user input was invalid
-        /// </summary>
-        /// <param name="userResponse">User input string</param>
-        /// <returns>Valid Cell object</returns>
-
-        public static void DrawOneFigureBoard() 
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-
-            // Print the heading of the board
-            Console.WriteLine("    H   G   F   E   D   C   B   A   ");
-            Console.WriteLine("  +---+---+---+---+---+---+---+---+");
-
-            for (int i = 0; i < 8; i++)
-            {
-                Console.Write($"{i + 1} | ");
-
-                for (int j = 0; j < 8; j++)
-                {
-                    string cell = ConvertIndexesToCell(i, j);
-                    if (board[cell] == null)
-                    {
-                        bool isInfluenecedCell = false;
-                        foreach (var item in board)
-                        {
-                            foreach (var influencedCell in item.InfluencedCells)
-                            {
-                                if (cell.Equals(influencedCell.ToString()))
-                                {
-                                    isInfluenecedCell = true;
-                                    Console.ForegroundColor = ConsoleColor.Yellow;
-                                    Console.Write("*");
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.Write(" | ");
-
-                                    break;
-                                }
-                            }
-                        }
-                        if (!isInfluenecedCell) 
-                        {
-                            Console.Write("  | ");
-                        }
-                        
-                    }
-                    else
-                    {
-                        // Get the first letter of figure type as an icon to display in Console.
-                        string icon = board[cell].GetType().Name.Substring(0, 1);
-                        Color color = board[cell].Color;
-                        //Change the Console Forground Color based on the Figure color (Red for Blacks and White for Whites)
-                        if (color == Color.White)
-                        {
-                            Console.ForegroundColor = ConsoleColor.White;
-                        }
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                        }
-
-                        Console.Write(icon);
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(" | ");
-                    }
-                }
-
-                Console.Write("\n");
-                Console.WriteLine("  +---+---+---+---+---+---+---+---+");
-            }
-        }
-
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="userResponse"></param>
-      /// <returns></returns>
-        public static Cell ConvertToValidCell(string userResponse)
-        {
-            if (userResponse.Length != 2)
-            {
-                Console.WriteLine("No matching cell for chessboard!");
-                return null;
-            }
-
-            char Letter = userResponse.ToUpper()[0];
-            int Number = (int)userResponse[1] - 48;
-            if ((Letter < 65 || Letter > 72) || (Number < 1 || Number > 8))
-            {
-                Console.WriteLine("No matching cell for chessboard!");
-                return null;
-            }
-
-            return new Cell(Letter, Number);
-        }
-
-        /// <summary>
-        /// Converts to indexes to location string of the chess board
-        /// </summary>
-        /// <param name="i"></param>
-        /// <param name="j"></param>
-        /// <returns>Chessboard cell string representation</returns>
-        private static string ConvertIndexesToCell(int i, int j)
-        {
-            string number = (i + 1).ToString();
-            char letter = (char)(72 - j);
-
-            return letter + number;
+            Figure temp = _board[oldCell];
+            _board.Remove(oldCell);
+            _board[newCell] = temp;
         }
     }
-
 }

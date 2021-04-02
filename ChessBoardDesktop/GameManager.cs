@@ -1,510 +1,187 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using ChessBoard;
 using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
-using ChessBoard.Extensions;
 using static ChessBoard.ChessBoardManager;
 
-namespace ChessGameManager
+namespace ChessBoardDesktop
 {
     /// <summary>
-    /// Manages the game of chess and plays with the user
+    /// Manages the Chess board game by giving turns to User and Computer brain
     /// </summary>
-    public static class ChessManager
+    public class GameManager
     {
         // Define the turn to play by a color of currenlty playing figures
-        private static Color _turn = Color.Black;
+        public CellColor Turn { get; set; }
 
-        private static char AlgorithmChoice;
+        public Dictionary<string, Grid> BoardOfDesktop { get; private set; }
 
-        // Run the chess game with Queen, Rook
-        public static void RunWinningAlgorithm(Color turn, List<KeyValuePair<Color, Type>> figures)
+        public Figure LastMoved { get; private set; }
+
+        private char _algorithmChoice;
+
+        public GameManager()
         {
-            StartTheGame(turn, figures);
-            while (!IsMate() && !IsStaleMate())
-            {
-                Play();
-            }
-        }
-
-        // Count the minimal steps of Knight
-        public static void RunKnightAlgorithm(List<KeyValuePair<Color, Type>> figures)
-        {
-            StartKinghtAlgorithmGame(figures);
-            DrawOneFigureBoard();
-            Cell cellTo = GetUserMoveTo();
-
-            GetKnightMinimalMovesCount1(cellTo);
-            GetKnightMinimalMovesCount2(cellTo);
-        }
-
-
-        public static void StartKinghtAlgorithmGame(List<KeyValuePair<Color, Type>> figures)
-        {
-            foreach (var item in figures)
-            {
-                Cell cell;
-                // Ask user for cell info on each figure, check if it's an acceptable
-                Console.WriteLine($"Enter chess board start cell for {item.Key.ToString()} {item.Value.Name}");
-                do
-                {
-                    cell = GetUserStartCell();
-                }
-                while (!IsAcceptableCell(cell, item.Value, item.Key));
-
-                CreateFigure(cell, item.Value, item.Key);
-            }
+            this.BoardOfDesktop = new Dictionary<string, Grid>();
+            _algorithmChoice = '0';
         }
 
         /// <summary>
-        /// Get the custom game position from user
+        /// Creates a Figure of given Type and Color and adds it to the Chess Board
         /// </summary>
-        /// <param name="turn">Defines whos turn it is to play according to given color</param>
-        /// <param name="figures">List of figures to be created and added to board</param>
-        private static void StartTheGame(Color turn, List<KeyValuePair<Color, Type>> figures)
+        /// <param name="cell">Cell on which the created figure is standing</param>
+        /// <param name="type">Type of the Figure to be created</param>
+        /// <param name="color">Color of Figure to be created</param>
+        public void CreateFigure(string cellString, string typeString, string colorString)
         {
-            DrawBoard();
-            // Create figures of specified color and on specified cell
-            foreach (var item in figures)
-            {
-                Cell cell;
-                // Ask user for cell info on each figure, check if it's an acceptable
-                Console.WriteLine($"Enter chess board start cell for {item.Key.ToString()} {item.Value.Name}");
-                do
-                {
-                    cell = GetUserStartCell();
-                }
-                while (!IsAcceptableCell(cell, item.Value, item.Key));
+            Type type = GetTypeFromString(typeString);
+            CellColor color = GetCellColorFromString(colorString);
+            Cell cell = new Cell(cellString);
 
-                CreateFigure(cell, item.Value, item.Key);
-                Console.Clear();
-                DrawBoard();
-            }
-
-            // Give the turn
-            _turn = turn;
-
-        }
-
-        /// <summary>
-        /// Checks if it is a Mate situation in the game:
-        /// if the King is under influence of opposite color figure and has no available cells to move to
-        /// </summary>
-        /// <returns>True if it is a Mate, False if it is not a Mate</returns>
-        private static bool IsMate()
-        {
-            // Get the King Figure
-            King king = GetTheKing(_turn);
-
-            if (IsUnderCheckCell(king.CurrentCell, king.Color))
-            {
-                foreach (var item in king.InfluencedCells)
-                {
-                    if (!IsInfluencedCell(item, king.Color) && IsFreeCell(item))
-                    {
-                        return false;
-                    }
-                }
-                Console.Clear();
-                DrawBoard();
-
-                // Print winner side name
-                string winner = _turn == Color.Black ? "Whites" : "Blacks";
-                Console.WriteLine($"Mate! {winner} win!");
-
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Verifies if the king of the current player is/will be under Chess Check
-        /// </summary>
-        /// <returns>True if the king is under Chess Check, False if it does not</returns>
-        private static bool IsCheck()
-        {
-
-            // Get the King Figure
-            King king = GetTheKing(_turn);
-
-            // Check if it is on cell under influence
-            if (IsUnderCheckCell(king.CurrentCell, king.Color))
-            {
-                Console.WriteLine($"{king.Color} king is under check!");
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Check if it is a stalemate situation in the game
-        /// </summary>
-        /// <returns>True if it is a stalemate, False if it is not</returns>
-        private static bool IsStaleMate()
-        {
-            King king = GetTheKing(_turn);
-
-            if (!IsUnderCheckCell(king.CurrentCell, king.Color))
-            {
-                foreach (var item in king.InfluencedCells)
-                {
-                    if (!IsUnderCheckCell(item, king.Color) && item != king.CurrentCell)
-                    {
-                        return false;
-                    }
-                }
-
-                Console.Clear();
-                DrawBoard();
-
-                Console.WriteLine("It is a stalemate...");
-                return true;
-            }
-            return false;
-
-        }
-
-        /// <summary>
-        /// Plays the game by giving turns to user and chessmanager's algorithm
-        /// </summary>
-        private static void Play()
-        {
-            if (_turn == Color.Black)
-            {
-                // Wait for the user to move a figure
-                WaitForUserToMove();
-            }
-            else
-            {
-                // Play the winning algorithm
-                TryWinningAlgorithm();
-            }
-        }
-
-        /// <summary>
-        /// Create figures of the specified types and add them to the chess board
-        /// </summary>
-        /// <param name="c">Letter of the location coordinate</param>
-        /// <param name="i">Interger of the location coordinate</param>
-        /// <param name="type">Type of figure to be created</param>
-        /// <param name="color">Color of the figure to be created</param>
-        private static void CreateFigure(Cell cell, Type type, Color color)
-        {
             // Create a figure
             Figure figure = (Figure)Activator.CreateInstance(type, cell, color);
 
             // Add to ChessBoard
             AddFigure(figure);
         }
-
-        #region User's turn to play
-        /// <summary>
-        /// Initializes the starting cell of figure according to user's custom position
-        /// </summary>
-        /// <returns>Custom position cell from user</returns>
-        private static Cell GetUserStartCell()
+        private Type GetTypeFromString(string type) 
         {
-            Cell cellFrom;
-
-            do
+            switch (type) 
             {
-                Console.Write("Enter only valid cell coordinates: ");
-
-                // Convert user input to Cell object
-                string userCellFrom = Console.ReadLine();
-                cellFrom = ConvertToValidCell(userCellFrom);
+                case "Q":
+                    return typeof(Queen);
+                case "R":
+                    return typeof(Rook);
+                default:
+                    return typeof(King);
+                
             }
-            while (cellFrom == null);
+        }
 
-            return cellFrom;
-
+        private CellColor GetCellColorFromString(string color) 
+        {
+            return color == "B" ? CellColor.Black : CellColor.White;
         }
 
         /// <summary>
-        /// Get the user input of which cell to move the figure from
+        /// Get the possible moves of the figure standing on the given cell and returns the list of possible cell names
         /// </summary>
-        /// <returns>Cell of the choosen figure</returns>
-        private static Cell GetUserMoveFrom()
+        /// <param name="cellString">String representation of Chess Board Cell on which the figure is standing</param>
+        /// <returns>List of string representation of possible cells to move</returns>
+        public List<string> GetPossibleMoves(string cellString)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Cell cellFrom;
+            Cell currentCell = new Cell(cellString);
+            Figure figure = GetFigureByCell(currentCell);
 
-            do
+            List<string> possibleCells = new List<string>();
+            foreach (var cell in figure.InfluencedCells)
             {
-                Console.Write("Enter the coordinates of the cell to move FROM: ");
-
-                // Convert user input to Cell object
-                string userCellFrom = Console.ReadLine();
-                cellFrom = ConvertToValidCell(userCellFrom);
-            }
-            while (cellFrom == null);
-
-            return cellFrom;
-        }
-
-        /// <summary>
-        /// Get the user input of which cell to move the figure to
-        /// </summary>
-        /// <returns>Cell of the choosen location</returns>
-        private static Cell GetUserMoveTo()
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Cell cellTo;
-
-            do
-            {
-                Console.Write("Enter the coordinates of the cell to move TO: ");
-
-                // Convert user input to Cell object
-                string userCellFrom = Console.ReadLine();
-                cellTo = ConvertToValidCell(userCellFrom);
-                if (!IsFreeCell(cellTo))
+                if (IsPossibleToMove(figure, cell) && figure.CurrentCell != cell)
                 {
-                    Console.WriteLine("There is already a figure here.");
+                    if ((figure is King))
+                    {
+                        if (!IsUnderCheckCell(cell, figure.Color))
+                        {
+                            possibleCells.Add(cell.ToString());
+                        }
+                    }
+                    else
+                    {
+                        possibleCells.Add(cell.ToString());
+                    }
                 }
             }
-            while (!(cellTo != null && IsFreeCell(cellTo)));
 
-            return cellTo;
+            return possibleCells;
         }
 
         /// <summary>
-        /// Asks a user to determine the move, moves the figure and updates the board.
+        /// Does the move of the user by updating the Chess Board according the Move.
         /// </summary>
-        private static void WaitForUserToMove()
+        /// <param name="cellFrom">Chess Board Cell from which the User moves.</param>
+        /// <param name="cellTo">Chess Board Cell to which the User moves.</param>
+        public void UserMove(string cellFrom, string cellTo)
         {
-            Console.Clear();
-
-            // Display the current board for the user
-            DrawBoard();
-
             // King of the user
-            King king;
+            King king = GetTheKing(Turn);
 
-            // The cell to be moved
-            Cell userCellFrom;
+            king.Move(new Cell(cellTo));
+            UpdateBoard(new Cell(cellFrom), king.CurrentCell);
 
-            //if king is under check display message and set the moveFrom cell to king's cell
+            this.Turn = CellColor.White;
+            this.LastMoved = king;
+        }
+
+        /// <summary>
+        /// Runs the winning algorithm and returns the current game situation: 0 = OK, 1 = Check, 2 = Mate, 3 = StaleMate
+        /// </summary>
+        /// <returns></returns>
+        public int BrainMove()
+        {
+            if (!IsMate() && !IsStaleMate())
+            {
+                RunWinningAlgorithm();
+            }
+            if (IsMate())
+            {
+                return 2;
+            }
+
+            if (IsStaleMate())
+            {
+                return 3;
+            }
+
             if (IsCheck())
             {
-                king = GetTheKing(_turn);
-                userCellFrom = king.CurrentCell;
-            }
-            // Get the user's cell to move from
-            else
-            {
-                do
-                {
-                    userCellFrom = GetUserMoveFrom();
-                    // for this particular game the only figure user hase will be the King
-                    king = GetFigureByCell(userCellFrom) as King;
-
-                    if (king == null)
-                    {
-                        Console.WriteLine("You do not have a figure on that position.");
-                    }
-
-                } while (king == null);
+                return 1;
             }
 
-            // Get the user's cell to move to
-            Cell userCellTo;
-            do
-            {
-                userCellTo = GetUserMoveTo();
-                if (IsUnderCheckCell(userCellTo, _turn))
-                {
-                    Console.WriteLine($"{_turn.ToString()} king will be under check!");
-                }
-            }
-            while (IsUnderCheckCell(userCellTo, Color.Black));
-
-            king.Move(userCellTo);
-            _turn = Color.White;
-            UpdateBoard(userCellFrom, userCellTo);
+            return 0;
         }
-        #endregion
-
-        #region Algorithm to get the minimum path from the current position of Knight to the given cell
 
         /// <summary>
-        /// Prints the minimal number of moves needed from the exisitng Knight figure on the board to the given cell (using queue)
+        /// After Computer Move updates the Chess Board and Desktop Board images according the Move.
         /// </summary>
-        /// <param name="CellTo">Cell the Knigth figure must reach to</param>
-        private static void GetKnightMinimalMovesCount1(Cell CellTo)
+        /// <param name="cellFrom">Chess Board Cell from which the figure moved</param>
+        /// <param name="cellTo">Chess Board Cell to which the figure moves</param>
+        private void UpdatePosition(Cell cellFrom, Cell cellTo)
         {
-            // Get the Knight object from the Board
-            Knight knight = GetFigure(typeof(Knight), Color.White) as Knight;
+            UpdateBoard(cellFrom, cellTo);
 
-            // Collection to hold all the possible moves of knight, cells will be enqueued consecutively, dequeued if cell is not the target cell 
-            Queue<Cell> allPossibleCells = new Queue<Cell>();
+            double top = BoardOfDesktop[cellTo.ToString()].Margin.Top;
+            double left = BoardOfDesktop[cellTo.ToString()].Margin.Left;
 
-            // Counter for number of dequeued cells: it allows to count the number of moves knight need to reach to that cell
-            int dequeuedIndex = 0;
-            // start with enqueuing the current position
-            allPossibleCells.Enqueue(knight.CurrentCell);
+            Figure figure = GetFigureByCell(cellTo);
+            this.LastMoved = figure;
 
-            // Enqueue and Dequeue cells until we get to the target cell
-            while (allPossibleCells.Peek() != CellTo)
+            Image image = BoardOfDesktop[cellFrom.ToString()].Tag as Image;
+            BoardOfDesktop[cellFrom.ToString()].Tag = null;
+            BoardOfDesktop[cellTo.ToString()].Tag = image;
+           
+            image.Margin = new Thickness(left, top, 0, 0);
+            image.Tag = cellTo.ToString();
+        }
+
+        /// <summary>
+        /// Runs the Computer's algorithm to win the end game with Queen and Rook
+        /// </summary>
+        private void RunWinningAlgorithm()
+        {
+            if (_algorithmChoice == '0')
             {
-                dequeuedIndex++;
-
-                var nextMoveCells = GetKnightMoves(allPossibleCells.Dequeue());
-                foreach (var cell in nextMoveCells)
-                {
-                    allPossibleCells.Enqueue(cell);
-                }
+                _algorithmChoice = PressingRelativelyToWhiteKing();
             }
 
-            // Convert the number of dequeued cells to the number of moves
-            int powerOfEight = -1;
-            int counter = 0;
-
-            while (counter <= dequeuedIndex)
+            if (!TryWinningWithQueenMove() && !TryWinningWithRookMove() && !TryWinningWithKingMove() && !TrySavingRook())
             {
-                powerOfEight++;
-                counter = counter + (int)Math.Pow(8, powerOfEight);
-            }
-
-            Console.WriteLine($"You need {powerOfEight} move(s). (Algorithm 1: Queue)");
-        }
-
-        /// <summary>
-        /// For the given cell it returns a list of cells that the Knight figure would have reached
-        /// </summary>
-        /// <param name="cellFrom">Cell from where the Knight figure would start its moves</param>
-        /// <returns>List of cells that the Knigth figure would have reached from the given cell</returns>
-        private static List<Cell> GetKnightMoves(Cell cellFrom)
-        {
-            int letter = cellFrom.Letter;
-            int number = cellFrom.Number;
-            List<Cell> cells = new List<Cell>();
-
-            // If the cell is out of board, we should add a dummy cell in its place to keep the number of queued cell equal to 8
-            Cell dummyCell = new Cell('0', 0);
-            for (int i = letter - 2; i <= letter + 2; i++)
-            {
-                if (i == letter)
-                {
-                    continue;
-                }
-                // if it is in limits of board
-                if (i >= 65 && i <= 72)
-                {
-                    if ((number + (3 - Math.Abs(letter - i)) >= 1 && number + (3 - Math.Abs(letter - i)) <= 8))
-                    {
-                        cells.Add(new Cell((char)i, number + (3 - Math.Abs(letter - i))));
-                    }
-                    else
-                    {
-                        cells.Add(dummyCell);
-                    }
-                    if ((number - (3 - Math.Abs(letter - i)) >= 1 && number - (3 - Math.Abs(letter - i)) <= 8))
-                    {
-                        cells.Add(new Cell((char)i, number - (3 - Math.Abs(letter - i))));
-                    }
-                    else
-                    {
-                        cells.Add(dummyCell);
-                    }
-                }
-                // if it is out of board add two dummy cells
-                else
-                {
-                    cells.Add(dummyCell);
-                    cells.Add(dummyCell);
-                }
-            }
-
-            return cells;
-        }
-
-
-        /// <summary>
-        /// Prints the minimal number of moves needed from the exisitng Knight figure on the board to the given cell (using template)
-        /// </summary>
-        /// <param name="CellTo">Cell the Knigth figure must reach to</param>
-        private static void GetKnightMinimalMovesCount2(Cell cellTo)
-        {
-            // Get the cell from which the knight starts its moves
-            Knight knight = GetFigure(typeof(Knight), Color.White) as Knight;
-            Cell cellFrom = knight.CurrentCell;
-
-            // Get the relative positing of knight cell to the target cell
-            int number = 1 + Math.Abs(cellTo.Number - cellFrom.Number);
-            int letter = 65 + Math.Abs(cellTo.Letter - cellFrom.Letter);
-
-            // Call the GetMovesCount with the relative cell location
-            int moves = GetMovesCount(new Cell((char)letter, number));
-
-            Console.WriteLine($"You need {moves} move(s). (Algorithm 2: Template)");
-        }
-
-        /// <summary>
-        /// Returns the number of moves needed for getting from relative cell <param name="cellFrom"> to fictive target 'A1'
-        /// </summary>
-        /// <param name="cellFrom">Cell from which the moves to A1 are calculated and returned</param>
-        /// <returns>Number of moves needed to reach A1</returns>
-        private static int GetMovesCount(Cell cellFrom)
-        {
-            // Get the Default tempalte (with fictive target cell 'A1')
-            int[,] tempalte = CreateTemplate();
-
-            // Convert Cell location to i and j indexes of 8x8 bi-dimentional array
-            (int, int) indexes = ConvertCellToIndexes(cellFrom);
-
-            // Return the respective element which represents the number of moves
-            return tempalte[indexes.Item1, indexes.Item2];
-        }
-
-
-        /// <summary>
-        /// Generates and returns the default template of moves on 8x8 board, having A1 at the upper left corner.
-        /// </summary>
-        /// <returns>Bi-Dimentional array of integers that represents the number of moves from specific cell to A1.</returns>
-        private static int[,] CreateTemplate()
-        {
-            int[,] fixedTemplate = new int[,]
-            {
-               { 0,3,2,3,2,3,4,5},
-               { 3,2,1,2,3,4,3,4},
-               { 2,1,4,3,2,3,4,5},
-               { 3,2,3,2,3,4,3,4},
-               { 2,3,2,3,4,3,4,5},
-               { 3,4,3,4,3,4,5,4},
-               { 4,3,4,3,4,5,4,5},
-               { 5,4,5,4,5,4,5,6},
-            };
-
-            return fixedTemplate;
-        }
-
-        /// <summary>
-        /// Converts board cell location to i and j indexes for 8x8 bi-dimentional array
-        /// </summary>
-        /// <param name="cell">Cell to convert to indexes</param>
-        /// <returns>Tuple of i and j indexes</returns>
-        private static (int, int) ConvertCellToIndexes(Cell cell)
-        {
-            int i = cell.Number - 1;
-            int j = cell.Letter - 65;
-
-            return (i, j);
-        }
-        #endregion
-
-        #region Algorithm for end game with Queen and Rook
-        /// <summary>
-        /// At the very begining chooses the alrogithm for pressing black king
-        /// Checks if there can be an end game with one Queen move or one Rook move, if not, continues with algorithm steps
-        /// </summary>
-        private static void TryWinningAlgorithm()
-        {
-            if (!TryWinningWithQueenMove() && !TryWinningWithRookMove() && !TrySavingRook())
-            {
-                switch (AlgorithmChoice)
+                switch (_algorithmChoice)
                 {
                     case 'D':
                         PressingDown();
@@ -519,26 +196,24 @@ namespace ChessGameManager
                         PressingRight();
                         break;
                     default:
-                        AlgorithmChoice = PressingRelativelyToWhiteKing();
                         break;
                 }
             }
 
         }
 
-
         /// <summary>
         /// Check the positing of white and black kings to define the better algorithm for pressing black king: opposite side of white king
         /// </summary>
         /// <returns>'D' if PressingDown is chosen, 'U' if PressingUp is chosen, 'L' if PressingLeft is chosen, 'R' if PressingRight is chosen</returns>
-        private static char PressingRelativelyToWhiteKing()
+        private char PressingRelativelyToWhiteKing()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
             Cell oppositeKingCell = oppositeKing.CurrentCell;
 
-            King king = GetTheKing(_turn);
+            King king = GetTheKing(Turn);
             Cell kingCell = king.CurrentCell;
 
 
@@ -567,17 +242,17 @@ namespace ChessGameManager
         /// Algoithm moves queen and rook in turn to keep pressing king to the border until it the Mate.
         /// </summary>
         /// <returns>True if moved, False if no case mathced</returns>
-        private static bool PressingDown()
+        private bool PressingDown()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
-            King king = GetTheKing(_turn);
+            King king = GetTheKing(Turn);
 
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
             Cell queenCellFrom = queen.CurrentCell;
 
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
             Cell rookCellFrom = rook.CurrentCell;
 
             Cell rookCellTo;
@@ -588,21 +263,21 @@ namespace ChessGameManager
                 //if rook is safe to move down
                 if (Math.Abs(rookCellFrom.Letter - oppositeKing.CurrentCell.Letter) >= 2
                     || IsPossibleToMove(queen, rookCellTo) || IsPossibleToMove(king, rookCellTo))
-                { 
+                {
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdateBoard(rookCellFrom, rookCellTo);
-                        _turn = oppositeColor;
+                        UpdatePosition(rookCellFrom, rookCellTo);
+                        Turn = oppositeColor;
                         return true;
                     }
                 }
                 // moves away of king
                 else
                 {
-                    if (oppositeKing.CurrentCell.Letter >=69)
+                    if (oppositeKing.CurrentCell.Letter >= 69)
                     {
-                       
+
                         rookCellTo = new Cell(queenCellFrom.Letter == 65 ? (char)(queenCellFrom.Letter + 1) : 'A', rookCellFrom.Number);
 
                     }
@@ -617,11 +292,11 @@ namespace ChessGameManager
                     }
 
                     rook.Move(rookCellTo);
-                    UpdateBoard(rookCellFrom, rookCellTo);
-                    _turn = oppositeColor;
+                    UpdatePosition(rookCellFrom, rookCellTo);
+                    Turn = oppositeColor;
                     return true;
                 }
-               
+
             }
             else if (rookCellFrom.Number == oppositeKing.CurrentCell.Number - 1)
             {
@@ -635,8 +310,8 @@ namespace ChessGameManager
                         if (IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                         {
                             queen.Move(queenCellTo);
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
                             return true;
                         }
                     }
@@ -655,14 +330,14 @@ namespace ChessGameManager
                         {
                             queen.Move(queenCellTo);
 
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
-                            if (IsStaleMate()) 
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
+                            if (IsStaleMate())
                             {
                                 queen.Move(queenCellFrom);
-                                UpdateBoard(queenCellTo,queenCellFrom);
-                                _turn = queen.Color;
-                                return TryMovingKing() || TryMovingQueen();
+                                UpdatePosition(queenCellTo, queenCellFrom);
+                                Turn = queen.Color;
+                                continue;
                             }
                             return true;
                         }
@@ -678,17 +353,17 @@ namespace ChessGameManager
         /// Algoithm moves queen and rook in turn to keep pressing king to the border until it the Mate.
         /// </summary>
         /// <returns>True if moved, False if no case mathced</returns>
-        private static bool PressingUp()
+        private bool PressingUp()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
-            King king = GetTheKing(_turn);
+            King king = GetTheKing(Turn);
 
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
             Cell queenCellFrom = queen.CurrentCell;
 
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
             Cell rookCellFrom = rook.CurrentCell;
 
             Cell rookCellTo;
@@ -703,8 +378,8 @@ namespace ChessGameManager
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdateBoard(rookCellFrom, rookCellTo);
-                        _turn = oppositeColor;
+                        UpdatePosition(rookCellFrom, rookCellTo);
+                        Turn = oppositeColor;
                         return true;
                     }
                 }
@@ -729,8 +404,8 @@ namespace ChessGameManager
                     }
 
                     rook.Move(rookCellTo);
-                    UpdateBoard(rookCellFrom, rookCellTo);
-                    _turn = oppositeColor;
+                    UpdatePosition(rookCellFrom, rookCellTo);
+                    Turn = oppositeColor;
                     return true;
                 }
             }
@@ -746,8 +421,8 @@ namespace ChessGameManager
                         if (IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                         {
                             queen.Move(queenCellTo);
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
                             return true;
                         }
                     }
@@ -766,14 +441,14 @@ namespace ChessGameManager
                         {
                             queen.Move(queenCellTo);
 
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
                             if (IsStaleMate())
                             {
                                 queen.Move(queenCellFrom);
-                                UpdateBoard(queenCellTo, queenCellFrom);
-                                _turn = queen.Color;
-                                return TryMovingKing() || TryMovingQueen();
+                                UpdatePosition(queenCellTo, queenCellFrom);
+                                Turn = queen.Color;
+                                continue;
                             }
                             return true;
                         }
@@ -789,17 +464,17 @@ namespace ChessGameManager
         /// Algoithm moves queen and rook in turn to keep pressing king to the border until it the Mate.
         /// </summary>
         /// <returns>True if moved, False if no case mathced</returns>
-        private static bool PressingLeft()
+        private bool PressingLeft()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
-            King king = GetTheKing(_turn);
+            King king = GetTheKing(Turn);
 
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
             Cell queenCellFrom = queen.CurrentCell;
 
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
             Cell rookCellFrom = rook.CurrentCell;
 
             Cell rookCellTo;
@@ -815,8 +490,8 @@ namespace ChessGameManager
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdateBoard(rookCellFrom, rookCellTo);
-                        _turn = oppositeColor;
+                        UpdatePosition(rookCellFrom, rookCellTo);
+                        Turn = oppositeColor;
                         return true;
                     }
                 }
@@ -838,8 +513,8 @@ namespace ChessGameManager
                     }
 
                     rook.Move(rookCellTo);
-                    UpdateBoard(rookCellFrom, rookCellTo);
-                    _turn = oppositeColor;
+                    UpdatePosition(rookCellFrom, rookCellTo);
+                    Turn = oppositeColor;
                     return true;
                 }
             }
@@ -855,8 +530,8 @@ namespace ChessGameManager
                         if (IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                         {
                             queen.Move(queenCellTo);
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
                             return true;
                         }
                     }
@@ -875,14 +550,14 @@ namespace ChessGameManager
                         {
                             queen.Move(queenCellTo);
 
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
                             if (IsStaleMate())
                             {
                                 queen.Move(queenCellFrom);
-                                UpdateBoard(queenCellTo, queenCellFrom);
-                                _turn = queen.Color;
-                                return TryMovingKing() || TryMovingQueen();
+                                UpdatePosition(queenCellTo, queenCellFrom);
+                                Turn = queen.Color;
+                                continue;
                             }
                             return true;
                         }
@@ -898,17 +573,17 @@ namespace ChessGameManager
         /// Algoithm moves queen and rook in turn to keep pressing king to the border until it the Mate.
         /// </summary>
         /// <returns>True if moved, False if no case mathced</returns>
-        private static bool PressingRight()
+        private bool PressingRight()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
-            King king = GetTheKing(_turn);
+            King king = GetTheKing(Turn);
 
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
             Cell queenCellFrom = queen.CurrentCell;
 
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
             Cell rookCellFrom = rook.CurrentCell;
 
             Cell rookCellTo;
@@ -923,8 +598,8 @@ namespace ChessGameManager
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdateBoard(rookCellFrom, rookCellTo);
-                        _turn = oppositeColor;
+                        UpdatePosition(rookCellFrom, rookCellTo);
+                        Turn = oppositeColor;
                         return true;
                     }
                 }
@@ -946,8 +621,8 @@ namespace ChessGameManager
                     }
 
                     rook.Move(rookCellTo);
-                    UpdateBoard(rookCellFrom, rookCellTo);
-                    _turn = oppositeColor;
+                    UpdatePosition(rookCellFrom, rookCellTo);
+                    Turn = oppositeColor;
                     return true;
 
                 }
@@ -964,8 +639,8 @@ namespace ChessGameManager
                         if (IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                         {
                             queen.Move(queenCellTo);
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
                             return true;
                         }
                     }
@@ -984,14 +659,14 @@ namespace ChessGameManager
                         {
                             queen.Move(queenCellTo);
 
-                            UpdateBoard(queenCellFrom, queenCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(queenCellFrom, queenCellTo);
+                            Turn = oppositeColor;
                             if (IsStaleMate())
                             {
                                 queen.Move(queenCellFrom);
-                                UpdateBoard(queenCellTo, queenCellFrom);
-                                _turn = queen.Color;
-                                return TryMovingKing() || TryMovingQueen();
+                                UpdatePosition(queenCellTo, queenCellFrom);
+                                Turn = queen.Color;
+                                continue;
                             }
                             return true;
                         }
@@ -1007,15 +682,15 @@ namespace ChessGameManager
         /// Move the queen to all its possible cells to check if there will be a Mate situation on one of them
         /// </summary>
         /// <returns>True if moveing queen can result in Mate, False if no Mate situation is possible for this positing</returns>
-        private static bool TryWinningWithQueenMove()
+        private bool TryWinningWithQueenMove()
         {
-            Color playerColor = _turn;
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor playerColor = Turn;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
-            King king = GetTheKing(_turn);
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
+            King king = GetTheKing(Turn);
 
             Cell cellFrom = queen.CurrentCell;
             List<Cell> currentInfuencedCells = queen.InfluencedCells;
@@ -1024,20 +699,20 @@ namespace ChessGameManager
             {
                 if (IsPossibleToMove(queen, cellTo) && IsFreeCell(cellTo) &&
                     ((Math.Abs(cellTo.Number - oppositeKing.CurrentCell.Number) >= 2 && Math.Abs(cellTo.Letter - oppositeKing.CurrentCell.Letter) >= 2)
-                        || IsPossibleToMove(rook,cellTo) || IsPossibleToMove(king,cellTo)))
+                        || IsPossibleToMove(rook, cellTo) || IsPossibleToMove(king, cellTo)))
                 {
                     queen.Move(cellTo);
-                    _turn = oppositeColor;
+                    Turn = oppositeColor;
                     if (IsMate())
                     {
-                        UpdateBoard(cellFrom, cellTo);
+                        UpdatePosition(cellFrom, cellTo);
 
                         return true;
                     }
                     else
                     {
                         queen.Move(cellFrom);
-                        _turn = playerColor;
+                        Turn = playerColor;
                     }
                 }
             }
@@ -1049,32 +724,72 @@ namespace ChessGameManager
         /// Move the rook to all its possible cells to check if there will be a Mate situation on one of them
         /// </summary>
         /// <returns>True if moveing rook can result in Mate, False if no Mate situation is possible for this positing</returns>
-        private static bool TryWinningWithRookMove()
+        private bool TryWinningWithRookMove()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
-            King king = GetTheKing(_turn);
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
+            King king = GetTheKing(Turn);
             Cell cellFrom = rook.CurrentCell;
 
             foreach (var cellTo in rook.InfluencedCells)
             {
-                if (IsPossibleToMove(queen, cellTo) && IsFreeCell(cellTo) &&
+                if (IsPossibleToMove(rook, cellTo) && IsFreeCell(cellTo) &&
                    ((Math.Abs(cellTo.Number - oppositeKing.CurrentCell.Number) >= 2 && Math.Abs(cellTo.Letter - oppositeKing.CurrentCell.Letter) >= 2)
-                       || IsPossibleToMove(queen,cellTo) || IsPossibleToMove(king,cellTo)))
+                       || IsPossibleToMove(queen, cellTo) || IsPossibleToMove(king, cellTo)))
                 {
                     rook.Move(cellTo);
+                    Turn = oppositeColor;
                     if (IsMate())
                     {
-                        UpdateBoard(cellFrom, cellTo);
-                        _turn = oppositeColor;
+                        UpdatePosition(cellFrom, cellTo);
                         return true;
                     }
                     else
                     {
                         rook.Move(cellFrom);
+                        Turn = Turn == CellColor.White ? CellColor.Black : CellColor.White;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Move the king to all its possible cells to check if there will be a Mate situation on one of them
+        /// </summary>
+        /// <returns>True if moveing rook can result in Mate, False if no Mate situation is possible for this positing</returns>
+        private bool TryWinningWithKingMove()
+        {
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
+
+            King oppositeKing = GetTheKing(oppositeColor);
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
+            King king = GetTheKing(Turn);
+            Cell cellFrom = king.CurrentCell;
+
+            foreach (var cellTo in king.InfluencedCells)
+            {
+                if (IsPossibleToMove(king, cellTo) && IsFreeCell(cellTo) &&
+                   ((Math.Abs(cellTo.Number - oppositeKing.CurrentCell.Number) >= 2 && Math.Abs(cellTo.Letter - oppositeKing.CurrentCell.Letter) >= 2)
+                       || IsPossibleToMove(queen, cellTo) || IsPossibleToMove(rook, cellTo)))
+                {
+                    king.Move(cellTo);
+
+                    Turn = oppositeColor;
+                    if (IsMate())
+                    {
+                        UpdatePosition(cellFrom, cellTo);
+                        return true;
+                    }
+                    else
+                    {
+                        king.Move(cellFrom);
+                        Turn = Turn == CellColor.White ? CellColor.Black : CellColor.White;
                     }
                 }
             }
@@ -1086,14 +801,14 @@ namespace ChessGameManager
         /// Checks if there is a need to move thr Rook to save it from opposite King
         /// </summary>
         /// <returns>True if moved, False if no need to move</returns>
-        private static bool TrySavingRook()
+        private bool TrySavingRook()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
-            King king = GetTheKing(_turn);
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
+            King king = GetTheKing(Turn);
             Cell rookCellFrom = rook.CurrentCell;
 
             for (int i = oppositeKing.CurrentCell.Letter - 1; i <= oppositeKing.CurrentCell.Letter + 1; i++)
@@ -1105,13 +820,14 @@ namespace ChessGameManager
                         !IsPossibleToMove(king, rookCellFrom))
                     {
                         Cell rookCellTo;
-                        switch (AlgorithmChoice)
+                        switch (_algorithmChoice)
                         {
                             case 'U':
                             case 'D':
                                 if (oppositeKing.CurrentCell.Letter >= 69)
                                 {
-                                    rookCellTo = new Cell('A', rookCellFrom.Number);
+                                    char letterTo = queen.CurrentCell.Letter == 'A' ? 'B' : 'A';
+                                    rookCellTo = new Cell(letterTo, rookCellFrom.Number);
                                     if (!(IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo)))
                                     {
                                         rookCellTo = new Cell((char)(king.CurrentCell.Letter + 1), rookCellFrom.Number);
@@ -1120,7 +836,8 @@ namespace ChessGameManager
                                 }
                                 else
                                 {
-                                    rookCellTo = new Cell('H', rookCellFrom.Number);
+                                    char letterTo = queen.CurrentCell.Letter == 'H' ? 'G' : 'H';
+                                    rookCellTo = new Cell(letterTo, rookCellFrom.Number);
                                     if (!(IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo)))
                                     {
                                         rookCellTo = new Cell((char)(king.CurrentCell.Letter - 1), rookCellFrom.Number);
@@ -1132,7 +849,8 @@ namespace ChessGameManager
 
                                 if (oppositeKing.CurrentCell.Number >= 5)
                                 {
-                                    rookCellTo = new Cell(rookCellFrom.Letter, 1);
+                                    int numberTo = queen.CurrentCell.Number == 1 ? 2 : 1;
+                                    rookCellTo = new Cell(rookCellFrom.Letter, numberTo);
                                     if (!(IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo)))
                                     {
                                         rookCellTo = new Cell(rookCellFrom.Letter, king.CurrentCell.Number + 1);
@@ -1141,7 +859,8 @@ namespace ChessGameManager
                                 }
                                 else
                                 {
-                                    rookCellTo = new Cell(rookCellFrom.Letter, 8);
+                                    int numberTo = queen.CurrentCell.Number == 8 ? 7 : 8;
+                                    rookCellTo = new Cell(rookCellFrom.Letter, numberTo);
                                     if (!(IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo)))
                                     {
                                         rookCellTo = new Cell(rookCellFrom.Letter, king.CurrentCell.Number - 1);
@@ -1152,8 +871,8 @@ namespace ChessGameManager
                         }
 
                         rook.Move(rookCellTo);
-                        UpdateBoard(rookCellFrom, rookCellTo);
-                        _turn = oppositeColor;
+                        UpdatePosition(rookCellFrom, rookCellTo);
+                        Turn = oppositeColor;
                         return true;
                     }
                 }
@@ -1165,16 +884,16 @@ namespace ChessGameManager
         /// Moves with the King vertically or horizontally depending on the chosen algorithm
         /// </summary>
         /// <returns></returns>
-        private static bool TryMovingKing()
+        private bool TryMovingKing()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
 
-            King king = GetTheKing(_turn);
+            King king = GetTheKing(Turn);
             Cell kingCellFrom = king.CurrentCell;
-            Rook rook = GetFigure(typeof(Rook),_turn) as Rook;
+            Rook rook = GetFigure(typeof(Rook), Turn) as Rook;
 
 
-            switch (AlgorithmChoice)
+            switch (_algorithmChoice)
             {
                 case 'U':
                 case 'D':
@@ -1193,8 +912,8 @@ namespace ChessGameManager
                         if (IsPossibleToMove(king, kingCellTo) && IsFreeCell(kingCellTo))
                         {
                             king.Move(kingCellTo);
-                            UpdateBoard(kingCellFrom, kingCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(kingCellFrom, kingCellTo);
+                            Turn = oppositeColor;
                             return true;
                         }
 
@@ -1202,7 +921,7 @@ namespace ChessGameManager
                     break;
                 case 'L':
                 case 'R':
-                    if (kingCellFrom.Number == rook.CurrentCell.Number) 
+                    if (kingCellFrom.Number == rook.CurrentCell.Number)
                     {
                         if (kingCellFrom.Number >= 5)
                         {
@@ -1217,8 +936,8 @@ namespace ChessGameManager
                         if (IsPossibleToMove(king, kingCellTo) && IsFreeCell(kingCellTo))
                         {
                             king.Move(kingCellTo);
-                            UpdateBoard(kingCellFrom, kingCellTo);
-                            _turn = oppositeColor;
+                            UpdatePosition(kingCellFrom, kingCellTo);
+                            Turn = oppositeColor;
                             return true;
                         }
                     }
@@ -1232,16 +951,16 @@ namespace ChessGameManager
         /// Moves with the Queen vertically or horizontally depending on the chosen algorithm
         /// </summary>
         /// <returns></returns>
-        private static bool TryMovingQueen() 
+        private bool TryMovingQueen()
         {
-            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
+            CellColor oppositeColor = Turn == CellColor.White ? CellColor.Black : CellColor.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
             Cell kingCellFrom = oppositeKing.CurrentCell;
 
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
+            Queen queen = GetFigure(typeof(Queen), Turn) as Queen;
             Cell queenCellFrom = queen.CurrentCell;
-            switch (AlgorithmChoice) 
+            switch (_algorithmChoice)
             {
                 case 'U':
                 case 'D':
@@ -1249,13 +968,13 @@ namespace ChessGameManager
                     {
                         if (queenCellTo.Number == queenCellFrom.Number &&
                             Math.Abs(queenCellTo.Letter - kingCellFrom.Letter) >= 2 &&
-                            queenCellTo != queenCellFrom) 
+                            queenCellTo != queenCellFrom)
                         {
                             if (IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                             {
                                 queen.Move(queenCellTo);
-                                UpdateBoard(queenCellFrom, queenCellTo);
-                                _turn = oppositeColor;
+                                UpdatePosition(queenCellFrom, queenCellTo);
+                                Turn = oppositeColor;
                                 return true;
                             }
                         }
@@ -1272,8 +991,8 @@ namespace ChessGameManager
                             if (IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                             {
                                 queen.Move(queenCellTo);
-                                UpdateBoard(queenCellFrom, queenCellTo);
-                                _turn = oppositeColor;
+                                UpdatePosition(queenCellFrom, queenCellTo);
+                                Turn = oppositeColor;
                                 return true;
                             }
                         }
@@ -1281,57 +1000,100 @@ namespace ChessGameManager
                     break;
             }
 
+            if (queenCellFrom.Letter == 'A' || queenCellFrom.Letter == 'H')
+            {
+                if (queenCellFrom.Number == 1 || queenCellFrom.Number == 8)
+                {
+                    foreach (var queenCellTo in queen.InfluencedCells)
+                    {
+                        if (Math.Abs(queenCellTo.Number - queenCellFrom.Number) == 1 &&
+                            Math.Abs(queenCellTo.Letter - queenCellFrom.Letter) == 1)
+                        {
+                            if (IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
+                            {
+                                queen.Move(queenCellTo);
+                                UpdatePosition(queenCellFrom, queenCellTo);
+                                Turn = oppositeColor;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
             return false;
         }
 
-        private static bool OpenRookPath() 
+        /// Checks if it is a Mate situation in the game:
+        /// if the King is under influence of opposite color figure and has no available cells to move to
+        /// </summary>
+        /// <returns>True if it is a Mate, False if it is not a Mate</returns>
+        private bool IsMate()
         {
-            Rook rook = GetFigure(typeof(Rook), _turn) as Rook;
-            Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
-            King king = GetTheKing(_turn);
+            // Get the King Figure
+            King king = GetTheKing(Turn);
 
-            switch (AlgorithmChoice) 
+            if (IsUnderCheckCell(king.CurrentCell, king.Color))
             {
-                case 'U':
-                    if (rook.CurrentCell.Letter == king.CurrentCell.Letter && rook.CurrentCell.Number == king.CurrentCell.Number + 1)
+                foreach (var item in king.InfluencedCells)
+                {
+                    if (!IsInfluencedCell(item, king.Color) && IsFreeCell(item))
                     {
-                        return TryMovingKing();
+                        return false;
                     }
-                    else
-                    {
-                        return TryMovingQueen();
-                    }
-                case 'D':
-                    if (rook.CurrentCell.Letter == king.CurrentCell.Letter && rook.CurrentCell.Number == king.CurrentCell.Number - 1)
-                    {
-                        return TryMovingKing();
-                    }
-                    else 
-                    {
-                        return TryMovingQueen();
-                    }
-                case 'L':
-                    if (rook.CurrentCell.Number == king.CurrentCell.Number && rook.CurrentCell.Letter == king.CurrentCell.Letter - 1)
-                    {
-                        return TryMovingKing();
-                    }
-                    else
-                    {
-                        return TryMovingQueen();
-                    }
-                case 'R':
-                    if (rook.CurrentCell.Number == king.CurrentCell.Number && rook.CurrentCell.Letter == king.CurrentCell.Letter + 1)
-                    {
-                        return TryMovingKing();
-                    }
-                    else
-                    {
-                        return TryMovingQueen();
-                    }
+                }
+
+
+                // Print winner side name
+
+                return true;
             }
             return false;
         }
-        #endregion
-    }
 
+        /// <summary>
+        /// Verifies if the king of the current player is/will be under Chess Check
+        /// </summary>
+        /// <returns>True if the king is under Chess Check, False if it does not</returns>
+        private bool IsCheck()
+        {
+
+            // Get the King Figure
+            King king = GetTheKing(Turn);
+
+            // Check if it is on cell under influence
+            if (IsUnderCheckCell(king.CurrentCell, king.Color))
+            {
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if it is a stalemate situation in the game
+        /// </summary>
+        /// <returns>True if it is a stalemate, False if it is not</returns>
+        private bool IsStaleMate()
+        {
+            King king = GetTheKing(Turn);
+
+            if (!IsUnderCheckCell(king.CurrentCell, king.Color))
+            {
+                foreach (var item in king.InfluencedCells)
+                {
+                    if (!IsUnderCheckCell(item, king.Color) && item != king.CurrentCell)
+                    {
+                        return false;
+                    }
+                }
+
+
+                return true;
+            }
+            return false;
+
+        }
+    }
 }

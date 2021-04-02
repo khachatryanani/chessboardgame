@@ -1,4 +1,4 @@
-﻿using ChessBoard.Figures;
+﻿ using ChessBoard.Figures;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -10,43 +10,30 @@ namespace ChessBoard.BoardAttributes
     public class Board : IEnumerable<Figure>
     {
         // Keeps figures in dictionary with their chessboard cell string representation as a key
-        private readonly Dictionary<string, Figure> board = new Dictionary<string, Figure>();
+        private readonly Dictionary<string, Figure> _board = new Dictionary<string, Figure>();
 
         //Indexer of the class
         public Figure this[string cell]
         {
-            get
-            {
-                if (board.ContainsKey(cell))
-                {
-                    return board[cell];
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            set
-            {
-                board[cell] = value;
-            }
+            get => _board.ContainsKey(cell) ? _board[cell] : null;
+            set => _board[cell] = value;
         }
 
         //Removes the value by key
         public bool Remove(string key)
         {
-            return board.Remove(key);
+            return _board.Remove(key);
         }
 
         //IEnumarator interface implementation
         public IEnumerator<Figure> GetEnumerator()
         {
-            return board.Values.GetEnumerator();
+            return _board.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)board.Values).GetEnumerator();
+            return ((IEnumerable)_board.Values).GetEnumerator();
         }
     }
 }

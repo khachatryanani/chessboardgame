@@ -7,7 +7,7 @@ namespace ChessBoard.Figures
 {
     public class Knight : Figure
     {
-        public Knight(Cell cell, Color color) : base(cell, color)
+        public Knight(Cell cell, CellColor color) : base(cell, color)
         {
         }
 

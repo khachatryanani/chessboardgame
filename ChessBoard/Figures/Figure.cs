@@ -14,14 +14,14 @@ namespace ChessBoard.Figures
         public Cell CurrentCell { get; private set; }
 
         // Color of the figure
-        public Color Color { get; set; }
+        public CellColor Color { get; set; }
 
         // Cells on ChessBoard that are falling under the influence of current figure. 
         //Also, this are the cells that the current figure is able to move to.
         public List<Cell> InfluencedCells { get; set; }
 
         // Parameterized constructor
-        public Figure(Cell cell, Color color)
+        protected Figure(Cell cell, CellColor color)
         {
             CurrentCell = cell;
             Color = color;
@@ -34,11 +34,6 @@ namespace ChessBoard.Figures
         /// <param name="cell">Cell to move to</param>
         public void Move(Cell cell)
         {
-            if (!InfluencedCells.ContainsCell(cell))
-            {
-                Console.WriteLine($"Cell is out of reach for your figure.");
-            }
-
             CurrentCell = cell;
 
             // Based on every new Cell location, determine what are the new cells of influence zone

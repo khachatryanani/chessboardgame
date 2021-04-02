@@ -9,7 +9,7 @@ namespace ChessBoard.Figures
     public class Rook : Figure
     {
         // Parameterized constructor
-        public Rook(Cell cell, Color color) : base(cell, color)
+        public Rook(Cell cell, CellColor color) : base(cell, color)
         {
 
         }
