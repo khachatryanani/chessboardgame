@@ -87,50 +87,6 @@ namespace ChessBoard
             return false;
         }
 
-        ///// <summary>
-        ///// Checks if the given cell for the given figure is free to stand in
-        ///// </summary>
-        ///// <param name="cell">Cell to check</param>
-        ///// <param name="figureType">Figure to check the cell for</param>
-        ///// <param name="color">Color of figure to check the cell for</param>
-        ///// <returns>True if cell is acceptable for the given figure, False if not</returns>
-        //public static bool IsAcceptableCell(Cell cell, Type figureType, CellColor color, out string error)
-        //{
-        //    if (IsFreeCell(cell))
-        //    {
-        //        if (figureType == typeof(King))
-        //        {
-        //            King king = new King(cell, color);
-
-        //            if (!IsUnderCheckCell(cell, color))
-        //            {
-        //                var rook = GetFigure(typeof(Rook), CellColor.White) as Rook;
-        //                if (Math.Abs(rook.CurrentCell.Letter - cell.Letter) == 1 && Math.Abs(rook.CurrentCell.Number - cell.Number) == 1) 
-        //                {
-        //                    error = "King will be near rook! Don't do this.";
-        //                    return false;
-        //                }
-        //                foreach (var item in king.InfluencedCells)
-        //                {
-        //                    if (!IsUnderCheckCell(item, color) && item != king.CurrentCell)
-        //                    {
-        //                        error = string.Empty;
-        //                        return true;
-        //                    }
-        //                }
-        //                error = "This will cause a stalemate!";
-        //                return false;
-        //            }
-        //            error = "King will be under check!";
-        //            return false;
-        //        }
-        //        error = string.Empty;
-        //        return true;
-        //    }
-        //    error = "There is already a figure in this cell!";
-        //    return false;
-        //}
-
         /// <summary>
         /// Checks if the given figure can move to the given cell: if it is free and if the path to reach it is also free
         /// </summary>
@@ -274,66 +230,6 @@ namespace ChessBoard
                             }
                         }
                 }
-                ////Case1: up-right
-                //if (numberMoveFrom > numberMoveTo && letterMoveFrom > letterMoveTo)
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom - 1; i > numberMoveTo && j > letterMoveTo; i--, j--)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
-                ////Case2: up-left
-                //else if (numberMoveFrom > numberMoveTo && letterMoveFrom < letterMoveTo)
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom + 1; i > numberMoveTo && j < letterMoveTo; i--, j++)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
-                ////Case3: down-right
-                //else if (numberMoveFrom < numberMoveTo && letterMoveFrom > letterMoveTo)
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom - 1; i < numberMoveTo && j > letterMoveTo; i++, j--)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
-                ////Case4: down-left
-                //else
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom + 1; i < numberMoveTo && j < letterMoveTo; i++, j++)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
             }
         }
 

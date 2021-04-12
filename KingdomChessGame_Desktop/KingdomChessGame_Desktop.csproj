@@ -4,22 +4,22 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>chesslogo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="BHolder.png" />
-    <None Remove="BR.png" />
-    <None Remove="Dot.png" />
-    <None Remove="Holder.png" />
     <None Remove="Images\BB.png" />
+    <None Remove="Images\BHolder.png" />
     <None Remove="Images\BK.png" />
     <None Remove="Images\BN.png" />
     <None Remove="Images\BP.png" />
     <None Remove="Images\BQ.png" />
     <None Remove="Images\BR.png" />
+    <None Remove="Images\chesslogo.ico" />
     <None Remove="Images\Holder.png" />
+    <None Remove="Images\phantom.png" />
     <None Remove="Images\WB.png" />
+    <None Remove="Images\WHolder.png" />
     <None Remove="Images\WK.png" />
     <None Remove="Images\WN.png" />
     <None Remove="Images\WP.png" />
@@ -30,15 +30,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChessBoard\ChessBoard.csproj" />
+    <ProjectReference Include="..\ChessEngine\ChessEngineLogic.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="BHolder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Holder.png" />
     <Resource Include="Images\BB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\BHolder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\BK.png">
@@ -56,10 +58,19 @@
     <Resource Include="Images\BR.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\chesslogo.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\Holder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\phantom.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\WB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\WHolder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\WK.png">
@@ -80,28 +91,9 @@
     <Resource Include="WHolder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="WoodBG.jpg" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Image\BK.png">
+    <Resource Include="WoodBG.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Image\BQ.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Image\BR.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Image\WK.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Image\WQ.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Image\WR.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Resource>
   </ItemGroup>
 
 </Project>

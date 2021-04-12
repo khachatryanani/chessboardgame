@@ -9,6 +9,10 @@ namespace ChessBoard.Figures
     {
         public Knight(Cell cell, CellColor color) : base(cell, color)
         {
+            string colorString = color == CellColor.Black ? "B" : "W";
+            this.Name = colorString + "N";
+
+            InfluencedCells = GetInfluencedCells();
         }
 
         protected override List<Cell> GetInfluencedCells() 

@@ -16,6 +16,9 @@ namespace ChessBoard.Figures
         // Color of the figure
         public CellColor Color { get; set; }
 
+        public string Name { get; set; }
+
+
         // Cells on ChessBoard that are falling under the influence of current figure. 
         //Also, this are the cells that the current figure is able to move to.
         public List<Cell> InfluencedCells { get; set; }
@@ -25,7 +28,6 @@ namespace ChessBoard.Figures
         {
             CurrentCell = cell;
             Color = color;
-            InfluencedCells = GetInfluencedCells();
         }
 
         /// <summary>

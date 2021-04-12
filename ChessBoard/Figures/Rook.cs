@@ -11,7 +11,10 @@ namespace ChessBoard.Figures
         // Parameterized constructor
         public Rook(Cell cell, CellColor color) : base(cell, color)
         {
+            string colorString = color == CellColor.Black ? "B" : "W";
+            this.Name = colorString + "R";
 
+            InfluencedCells = GetInfluencedCells();
         }
 
         /// <summary>
