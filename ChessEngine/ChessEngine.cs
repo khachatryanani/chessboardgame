@@ -47,7 +47,25 @@ namespace ChessEngineLogic
         private void UpdatePosition(Figure figure, Cell cellFrom, Cell cellTo)
         {
             UpdateBoard(cellFrom, cellTo);
-            OnFigureMoved(figure.Name, cellFrom.ToString(), cellTo.ToString());
+            OnFigureMoved(figure.Name, cellFrom.ToString(), cellTo.ToString(), GetGameStatus());
+        }
+
+        private int GetGameStatus() 
+        {
+            if (IsMate())
+            {
+                return 2;
+            }
+            else if (IsStaleMate())
+            {
+                return 3;
+            }
+            else if (IsCheck()) 
+            {
+                return 1;
+            }
+
+            return 0;
         }
 
         /// <summary>

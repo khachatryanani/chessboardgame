@@ -8,15 +8,19 @@ namespace ChessEngineLogic
 {
     public partial class ChessEngine
     {
+        /// <summary>
+        /// Algorithm choice for Queen End Game
+        /// </summary>
         private char _algorithmChoice = '0';
 
-        public delegate void FigureMoveHandler(string figureName, string cellFrom, string cellTo);
+        /// <summary>
+        /// Event occures when a figure is moved in the inner board.
+        /// </summary>
+        public event EventHandler<GameEventArgs> FigureMoved;
 
-        public event FigureMoveHandler FigureMoved;
-
-        protected virtual void OnFigureMoved(string figureName, string cellFrom, string cellTo)
+        protected virtual void OnFigureMoved(string figureName, string cellFrom, string cellTo, int status)
         {
-            FigureMoved?.Invoke(figureName, cellFrom, cellTo);
+            FigureMoved?.Invoke(this, new GameEventArgs(figureName,cellFrom,cellTo,status));
         }
 
         /// <summary>

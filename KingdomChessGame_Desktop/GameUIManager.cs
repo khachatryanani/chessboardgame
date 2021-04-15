@@ -25,6 +25,8 @@ namespace KingdomChessGame_Desktop
         /// </summary>
         private readonly Brush _selectedBlackColor;
         private readonly Brush _selectedWhiteColor;
+        private readonly Brush _blackColor;
+
 
 
         /// <summary>
@@ -57,10 +59,12 @@ namespace KingdomChessGame_Desktop
             GridBoard = new List<Grid>();
 
             _engine = new ChessEngine("Black");
-            _engine.FigureMoved += OnFigureMove;
+            _engine.FigureMoved += FigureMoved;
 
-            _selectedBlackColor = (Brush)(new BrushConverter().ConvertFrom("#CF6868"));
+            _selectedBlackColor = (Brush)(new BrushConverter().ConvertFrom("#F85F9E"));
             _selectedWhiteColor = (Brush)(new BrushConverter().ConvertFrom("#FDB6B6"));
+            _blackColor = (Brush)(new BrushConverter().ConvertFrom("#67D07D"));
+
         }
 
         /// <summary>
@@ -110,15 +114,15 @@ namespace KingdomChessGame_Desktop
         /// <param name="figureName">Name of the figure that moved</param>
         /// <param name="cellFrom">Chess board cell from which figure moved.</param>
         /// <param name="cellTo">Chess board cell to which figure moved.</param>
-        private void OnFigureMove(string figureName, string cellFrom, string cellTo)
+        private void FigureMoved(object sender, GameEventArgs e)
         {
-            double top = GetGridByName(cellTo).Margin.Top;
-            double left = GetGridByName(cellTo).Margin.Left;
+            double top = GetGridByName(e.CellTo).Margin.Top;
+            double left = GetGridByName(e.CellTo).Margin.Left;
 
-            Image image = GetImageByFigureName(figureName);
+            Image image = GetImageByFigureName(e.MovedFigure);
 
             image.Margin = new Thickness(left, top, 0, 0);
-            image.Tag = cellTo;
+            image.Tag = e.CellTo;
         }
 
         /// <summary>
@@ -164,7 +168,7 @@ namespace KingdomChessGame_Desktop
             foreach (var cell in possibleMoves)
             {
                 Grid grid = GetGridByName(cell);
-                grid.Background = grid.Background == Brushes.RosyBrown ? _selectedBlackColor : _selectedWhiteColor;
+                grid.Background = grid.Background == _blackColor ? _selectedBlackColor : _selectedWhiteColor;
             }
         }
 
@@ -179,7 +183,7 @@ namespace KingdomChessGame_Desktop
             foreach (var cell in possibleMoves)
             {
                 Grid grid = GetGridByName(cell);
-                grid.Background = grid.Background == _selectedBlackColor ? Brushes.RosyBrown : Brushes.White;
+                grid.Background = grid.Background == _selectedBlackColor ? _blackColor : Brushes.White;
             }
         }
 
@@ -264,13 +268,13 @@ namespace KingdomChessGame_Desktop
         /// <returns>List of Grid that form the Chess Board.</returns>
         public List<Grid> CreateBoard()
         {
-            SolidColorBrush brushes = Brushes.RosyBrown;
+            Brush brushes = _blackColor;
             int marginTop = 150;
 
             for (int i = 0; i < 8; i++)
             {
                 int marginLeft = 260;
-                brushes = brushes == Brushes.RosyBrown ? Brushes.White : Brushes.RosyBrown;
+                brushes = brushes == _blackColor? Brushes.White : _blackColor;
                 for (int j = 0; j < 8; j++)
                 {
                     string number = (8 - i).ToString();
@@ -291,7 +295,7 @@ namespace KingdomChessGame_Desktop
                     GridBoard.Add(grid);
 
                     marginLeft += 59;
-                    brushes = brushes == Brushes.RosyBrown ? Brushes.White : Brushes.RosyBrown;
+                    brushes = brushes == _blackColor ? Brushes.White : _blackColor;
                 }
                 marginTop += 59;
             }

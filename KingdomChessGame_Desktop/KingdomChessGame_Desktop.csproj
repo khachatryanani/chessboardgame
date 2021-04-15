@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="BHolder.png" />
+    <None Remove="Holder.png" />
     <None Remove="Images\BB.png" />
     <None Remove="Images\BHolder.png" />
     <None Remove="Images\BK.png" />
@@ -25,7 +25,7 @@
     <None Remove="Images\WP.png" />
     <None Remove="Images\WQ.png" />
     <None Remove="Images\WR.png" />
-    <None Remove="WHolder.png" />
+    <None Remove="Pattern.png" />
     <None Remove="WoodBG.jpg" />
   </ItemGroup>
 
@@ -34,13 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="BHolder.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="Images\BB.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\BHolder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\BK.png">
@@ -61,16 +55,10 @@
     <Resource Include="Images\chesslogo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\Holder.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="Images\phantom.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\WB.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\WHolder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\WK.png">
@@ -88,7 +76,10 @@
     <Resource Include="Images\WR.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="WHolder.png">
+    <Resource Include="Holder.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Pattern.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="WoodBG.jpg">

@@ -28,7 +28,36 @@ namespace ChessEngineLogic
             foreach (var item in cells)
             {
                 Cell pathCell = new Cell((char)(cellTo.Letter + (coefs.Item2 * item.Item2)), cellTo.Number + (coefs.Item1 * item.Item1));
+                if (pathCell.Number > 8)
+                {
+
+                    pathCell.Number -= 2 * (Math.Abs(cellFrom.Number - pathCell.Number));
+                }
+                else if (pathCell.Number < 1)
+                {
+                    pathCell.Number += 2 * (Math.Abs(cellFrom.Number - pathCell.Number));
+                }
+
+                if (pathCell.Letter > 72)
+                {
+                    pathCell.Letter -= (char)(2 * (Math.Abs(cellFrom.Letter - pathCell.Letter)));
+                }
+                else if (pathCell.Letter < 65)
+                {
+                    pathCell.Letter += (char)(2 * (Math.Abs(cellFrom.Letter - pathCell.Letter)));
+                }
+
+                //if (cellFrom.Letter < cellTo.Letter || cellFrom.Number > cellTo.Number) 
+                //{
+                //    pathCell.Number -= 2 * (Math.Abs(cellFrom.Number - pathCell.Number));
+                //}
+
+                //if (cellFrom.Letter < cellTo.Letter)
+                //{
+                //    pathCell.Letter += (char)(2 * (Math.Abs(cellFrom.Letter - pathCell.Letter)));
+                //}
                 path.Add(pathCell.ToString());
+                cellFrom = pathCell;
             }
 
             return path;
@@ -114,6 +143,74 @@ namespace ChessEngineLogic
 
         private (int, int) GetCoefficiants(Cell cellFrom, Cell cellTo)
         {
+            
+            //if (cellTo.Letter <= cellFrom.Letter && cellTo.Letter < 69)
+            //{
+            //    if (cellTo.Number <= cellFrom.Number && cellTo.Number < 5)
+            //    {
+            //        return (1, 1);
+            //    }
+            //    else
+            //    {
+            //        return (-1, 1);
+            //    }
+            //}
+            //else
+            //{
+            //    if (cellTo.Number <= cellFrom.Number && cellTo.Number > 4)
+            //    {
+            //        return (1, -1);
+            //    }
+            //    else
+            //    {
+            //        return (-1, -1);
+            //    }
+            //}
+
+            //if (cellTo.Letter <= cellFrom.Letter && cellTo.Number <= cellFrom.Number)
+            //{
+            //    return (1, 1);
+            //}
+
+            //if (cellTo.Letter > cellFrom.Letter && cellTo.Number <= cellFrom.Number)
+            //{
+            //    return (1, -1);
+            //}
+
+            //if (cellTo.Letter <= cellFrom.Letter && cellTo.Number > cellFrom.Number)
+            //{
+            //    return (-1, 1);
+            //}
+
+            //if (cellTo.Letter > cellFrom.Letter && cellTo.Number > cellFrom.Number)
+            //{
+            //    return (-1, -1);
+            //}
+            //return (0, 0);
+
+            //if (cellTo.Letter <= 69)
+            //{
+            //    if (cellTo.Number >= 5 ||)
+            //    {
+            //        return (-1, 1);
+            //    }
+            //    else
+            //    {
+            //        return (1, 1);
+            //    }
+            //}
+            //else 
+            //{
+            //    if (cellTo.Number >= 5)
+            //    {
+            //        return (-1, -1);
+            //    }
+            //    else
+            //    {
+            //        return (1, -1);
+            //    }
+            //}
+
             if (cellTo.Letter <= cellFrom.Letter)
             {
                 if (cellTo.Number <= cellFrom.Number)
@@ -125,7 +222,7 @@ namespace ChessEngineLogic
                     return (-1, 1);
                 }
             }
-            else
+            else 
             {
                 if (cellTo.Number <= cellFrom.Number)
                 {
@@ -136,6 +233,7 @@ namespace ChessEngineLogic
                     return (-1, -1);
                 }
             }
+
         }
     }
 }

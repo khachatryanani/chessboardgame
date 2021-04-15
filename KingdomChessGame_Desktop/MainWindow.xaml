@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KingdomChessGame_Desktop"
         mc:Ignorable="d"
-        Title="Chess Board Game" Height="820" Width="1000" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Background="DarkOliveGreen">
+        Title="Chess Board Game" Height="820" Width="1000" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" >
     <Grid x:Name="MainGrid">
         <!--images-->
-        <Image x:Name="BG" Source="/WoodBG.jpg" Stretch="Fill" />
-        <Image Name="WHolder" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="263,20,0,0" Height="100" Width="468" />
-        <Image Name="BHolder" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="263,671,0,0" Height="100" Width="468" />
+        <Image x:Name="BG" Source="/Pattern.png" Stretch="Fill" />
+        <Image Name="WHolder" Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,22,0,0" Height="96" Width="489" />
+        <Image Name="BHolder"   Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,671,0,0" Height="96" Width="489" />
 
         <!--labels-->
         <Label Content="8" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,159,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
@@ -47,12 +47,12 @@
         <TextBlock Name="MessageBox" Background="Wheat" Foreground="DarkOliveGreen" Padding="10" TextWrapping="Wrap" Width="180" Height="100" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="780,410,0,0"></TextBlock>
 
         <!--buttons-->
-        <Button x:Name="ResetBtn" Content="Reset Board" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,237,0,0" VerticalAlignment="Top" Width="180" />
-        <Button x:Name="DefaultSetBtn" Content="Set Default Board"  FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,182,0,0"  VerticalAlignment="Top" Width="180" />
-        <Button x:Name="StartBtn" Content="Start the Game" Foreground="White" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,292,0,0" Background="DarkOliveGreen" VerticalAlignment="Top" Width="180" Click="StartBtn_Click"/>
+        <Button x:Name="ResetBtn" Content="Reset Board" FontSize="18"  Foreground="White" BorderThickness="0" Background="#F85F9E" HorizontalAlignment="Left" Height="50" Margin="24,247,0,0" VerticalAlignment="Top" Width="180" />
+        <Button x:Name="DefaultSetBtn" Content="Set Default Board" Foreground="White" BorderThickness="0" Background="#F6D02F" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,192,0,0"  VerticalAlignment="Top" Width="180" />
+        <Button x:Name="StartBtn" Content="Start the Game" Foreground="White" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,302,0,0" BorderThickness="0" Background="#67D07D" VerticalAlignment="Top" Width="180" Click="StartBtn_Click"/>
 
         <!--comboboxes-->
-        <ComboBox Name="GameChoiceCombo" HorizontalAlignment="Left" Margin="24,142,0,0" VerticalAlignment="Top" Width="180" Height="35" Background="Wheat" SelectionChanged="GameChoiceCombo_SelectionChanged" >
+        <ComboBox Name="GameChoiceCombo" HorizontalAlignment="Left" Margin="24,152,0,0" VerticalAlignment="Top" Width="180" Height="35" Background="Wheat" SelectionChanged="GameChoiceCombo_SelectionChanged" >
             <ComboBoxItem IsSelected="True">
                 <TextBlock Text="Pick your option" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150"  ></TextBlock>
             </ComboBoxItem>
