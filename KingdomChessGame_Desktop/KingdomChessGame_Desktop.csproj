@@ -26,7 +26,6 @@
     <None Remove="Images\WQ.png" />
     <None Remove="Images\WR.png" />
     <None Remove="Pattern.png" />
-    <None Remove="WoodBG.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -80,9 +79,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Pattern.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="WoodBG.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

@@ -9,9 +9,9 @@ namespace ChessBoard.Figures
     public class King : Figure
     {
         // Parameterized constructor
-        public King(Cell cell, CellColor color) : base(cell, color)
+        public King(Cell cell, Color color) : base(cell, color)
         {
-            string colorString = color == CellColor.Black ? "B" : "W";
+            string colorString = color == Color.Black ? "B" : "W";
             this.Name = colorString + "K";
 
             InfluencedCells = GetInfluencedCells();

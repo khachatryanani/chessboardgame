@@ -7,9 +7,9 @@ namespace ChessBoard.Figures
 {
     public class Knight : Figure
     {
-        public Knight(Cell cell, CellColor color) : base(cell, color)
+        public Knight(Cell cell, Color color) : base(cell, color)
         {
-            string colorString = color == CellColor.Black ? "B" : "W";
+            string colorString = color == Color.Black ? "B" : "W";
             this.Name = colorString + "N";
 
             InfluencedCells = GetInfluencedCells();
@@ -20,6 +20,7 @@ namespace ChessBoard.Figures
             int letter = this.CurrentCell.Letter;
             int number = this.CurrentCell.Number;
             List<Cell> cells = new List<Cell>();
+            cells.Add(this.CurrentCell);
             for (int i = letter - 2; i <= letter + 2; i++)
             {
                 if (i == letter) 

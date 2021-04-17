@@ -14,7 +14,7 @@ namespace ChessBoard.Figures
         public Cell CurrentCell { get; private set; }
 
         // Color of the figure
-        public CellColor Color { get; set; }
+        public Color Color { get; set; }
 
         public string Name { get; set; }
 
@@ -24,7 +24,7 @@ namespace ChessBoard.Figures
         public List<Cell> InfluencedCells { get; set; }
 
         // Parameterized constructor
-        protected Figure(Cell cell, CellColor color)
+        protected Figure(Cell cell, Color color)
         {
             CurrentCell = cell;
             Color = color;

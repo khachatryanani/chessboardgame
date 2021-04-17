@@ -4,20 +4,17 @@ using System.Text;
 
 namespace ChessEngineLogic
 {
+    /// <summary>
+    /// Chess Game event arguments that will be sent to event handlers.
+    /// </summary>
     public class GameEventArgs : EventArgs
     {
         public string MovedFigure { get; set; }
-        public string CellFrom { get; set; }
         public string CellTo { get; set; }
-
         public int GameStatus { get; set; }
+        public string CurrentPlayer { get; set; }
+        public string WinnerPlayer { get; set; }
 
-        public GameEventArgs(string figure, string cellFrom, string cellTo, int status)
-        {
-            this.MovedFigure = figure;
-            this.CellFrom = cellFrom;
-            this.CellTo = cellTo;
-            this.GameStatus = status;
-        }
+        public GameEventArgs() { }
     }
 }

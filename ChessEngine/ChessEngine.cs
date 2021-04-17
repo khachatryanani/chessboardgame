@@ -11,7 +11,33 @@ namespace ChessEngineLogic
         /// <summary>
         /// Turn of the player represented by CellColor enum value
         /// </summary>
-        private CellColor _turn;
+        private Color _turn;
+
+        /// <summary>
+        /// Event occures when a figure is moved in the inner board.
+        /// </summary>
+        public event EventHandler<GameEventArgs> FigureMoved;
+
+        protected virtual void OnFigureMoved(Figure movedFigure)
+        {
+            int status = GetGameStatus();
+            string currentPlayer = movedFigure.Color == Color.Black ? "White" : "Black";
+            string winner = string.Empty;
+
+            if (status == 2) 
+            {
+                winner = _turn == Color.Black ? "Whites" : "Blacks";
+            }
+
+            FigureMoved?.Invoke(this, new GameEventArgs
+            {
+                MovedFigure = movedFigure.Name,
+                CellTo = movedFigure.CurrentCell.ToString(),
+                GameStatus = status,
+                CurrentPlayer = currentPlayer,
+                WinnerPlayer = winner
+            }) ;
+        }
 
         /// <summary>
         /// Constructor
@@ -19,7 +45,7 @@ namespace ChessEngineLogic
         /// <param name="playerColor">Color of the first player.</param>
         public ChessEngine(string playerColor) 
         {
-            _turn = playerColor == "Black" ? CellColor.Black : CellColor.White;
+            _turn = playerColor == "Black" ? Color.Black : Color.White;
         }
 
         /// <summary>
@@ -47,9 +73,13 @@ namespace ChessEngineLogic
         private void UpdatePosition(Figure figure, Cell cellFrom, Cell cellTo)
         {
             UpdateBoard(cellFrom, cellTo);
-            OnFigureMoved(figure.Name, cellFrom.ToString(), cellTo.ToString(), GetGameStatus());
+            OnFigureMoved(figure);
         }
 
+        /// <summary>
+        /// Returns the current game status: 0 = usual, 1 = check, 2 = mate, 3 = stalemate
+        /// </summary>
+        /// <returns>Game status in integer representation</returns>
         private int GetGameStatus() 
         {
             if (IsMate())
@@ -109,7 +139,7 @@ namespace ChessEngineLogic
         public void CreateFigure(string cellString, string typeString, string colorString)
         {
             Type type = GetTypeFromString(typeString);
-            CellColor color = GetCellColorFromString(colorString);
+            Color color = GetCellColorFromString(colorString);
             Cell cell = new Cell(cellString);
 
             // Create a figure
@@ -139,9 +169,9 @@ namespace ChessEngineLogic
         /// </summary>
         /// <param name="color">String representation of color</param>
         /// <returns>CellColor value relevant to given color name.</returns>
-        private CellColor GetCellColorFromString(string color)
+        private Color GetCellColorFromString(string color)
         {
-            return color == "B" ? CellColor.Black : CellColor.White;
+            return color == "B" ? Color.Black : Color.White;
         }
 
         /// <summary>
@@ -156,34 +186,10 @@ namespace ChessEngineLogic
             
             UpdateBoard(new Cell(cellFrom), new Cell(cellTo));
 
-            this._turn = this._turn == CellColor.Black ? CellColor.White : CellColor.Black;
+            this._turn = this._turn == Color.Black ? Color.White : Color.Black;
         }
 
-        /// Checks if it is a Mate situation in the game:
-        /// if the King is under influence of opposite color figure and has no available cells to move to
-        /// </summary>
-        /// <returns>True if it is a Mate, False if it is not a Mate</returns>
-        private bool IsMate()
-        {
-            // Get the King Figure
-            King king = GetTheKing(_turn);
-
-            if (IsUnderCheckCell(king.CurrentCell, king.Color))
-            {
-                foreach (var item in king.InfluencedCells)
-                {
-                    if (!IsInfluencedCell(item, king.Color) && IsFreeCell(item))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-
+        // Move to ChessBoard as a seperate class that checks
         /// <summary>
         /// Verifies if the king of the current player is/will be under Chess Check
         /// </summary>
@@ -204,6 +210,29 @@ namespace ChessEngineLogic
             return false;
         }
 
+        /// Checks if it is a Mate situation in the game:
+        /// if the King is under influence of opposite color figure and has no available cells to move to
+        /// </summary>
+        /// <returns>True if it is a Mate, False if it is not a Mate</returns>
+        private bool IsMate()
+        {
+            King king = GetTheKing(_turn);
+            if (IsCheck()) 
+            {
+                foreach (var item in king.InfluencedCells)
+                {
+                    if (!IsInfluencedCell(item, king.Color) && IsFreeCell(item))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Check if it is a stalemate situation in the game
         /// </summary>
@@ -212,7 +241,7 @@ namespace ChessEngineLogic
         {
             King king = GetTheKing(_turn);
 
-            if (!IsUnderCheckCell(king.CurrentCell, king.Color))
+            if (!IsCheck())
             {
                 foreach (var item in king.InfluencedCells)
                 {

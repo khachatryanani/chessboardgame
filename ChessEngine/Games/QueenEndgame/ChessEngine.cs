@@ -12,21 +12,11 @@ namespace ChessEngineLogic
         /// Algorithm choice for Queen End Game
         /// </summary>
         private char _algorithmChoice = '0';
-
-        /// <summary>
-        /// Event occures when a figure is moved in the inner board.
-        /// </summary>
-        public event EventHandler<GameEventArgs> FigureMoved;
-
-        protected virtual void OnFigureMoved(string figureName, string cellFrom, string cellTo, int status)
-        {
-            FigureMoved?.Invoke(this, new GameEventArgs(figureName,cellFrom,cellTo,status));
-        }
-
+       
         /// <summary>
         /// Runs the Computer's algorithm to win the end game with Queen and Rook
         /// </summary>
-        private void PlayWinningWithQueenAndRookAlgorithm()
+        public void PlayWinningWithQueenAndRookAlgorithm()
         {
             if (_algorithmChoice == '0')
             {
@@ -62,7 +52,7 @@ namespace ChessEngineLogic
         /// <returns>'D' if PressingDown is chosen, 'U' if PressingUp is chosen, 'L' if PressingLeft is chosen, 'R' if PressingRight is chosen</returns>
         private char PressingRelativelyToWhiteKing()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
             Cell oppositeKingCell = oppositeKing.CurrentCell;
@@ -98,7 +88,7 @@ namespace ChessEngineLogic
         /// <returns>True if moved, False if no case mathced</returns>
         private void PressingDown()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
             King king = GetTheKing(_turn);
@@ -121,8 +111,8 @@ namespace ChessEngineLogic
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         return;
                     }
                 }
@@ -131,9 +121,7 @@ namespace ChessEngineLogic
                 {
                     if (oppositeKing.CurrentCell.Letter >= 69)
                     {
-
                         rookCellTo = new Cell(queenCellFrom.Letter == 65 ? (char)(queenCellFrom.Letter + 1) : 'A', rookCellFrom.Number);
-
                     }
                     else
                     {
@@ -146,8 +134,8 @@ namespace ChessEngineLogic
                     }
 
                     rook.Move(rookCellTo);
-                    UpdatePosition(rook, rookCellFrom, rookCellTo);
                     _turn = oppositeColor;
+                    UpdatePosition(rook, rookCellFrom, rookCellTo);
                     return;
                 }
 
@@ -163,8 +151,8 @@ namespace ChessEngineLogic
                         IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                     {
                         queen.Move(queenCellTo);
-                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         return;
                     }
                 }
@@ -186,8 +174,8 @@ namespace ChessEngineLogic
                         if (IsStaleMate())
                         {
                             queen.Move(queenCellFrom);
-                            UpdatePosition(queen, queenCellTo, queenCellFrom);
                             _turn = queen.Color;
+                            UpdatePosition(queen, queenCellTo, queenCellFrom);
                             continue;
                         }
                         return;
@@ -207,7 +195,7 @@ namespace ChessEngineLogic
         /// <returns>True if moved, False if no case mathced</returns>
         private void PressingUp()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
             King king = GetTheKing(_turn);
@@ -230,8 +218,8 @@ namespace ChessEngineLogic
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         return;
                     }
                 }
@@ -256,8 +244,8 @@ namespace ChessEngineLogic
                     }
 
                     rook.Move(rookCellTo);
-                    UpdatePosition(rook, rookCellFrom, rookCellTo);
                     _turn = oppositeColor;
+                    UpdatePosition(rook, rookCellFrom, rookCellTo);
                     return;
                 }
             }
@@ -272,8 +260,8 @@ namespace ChessEngineLogic
                         IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                     {
                         queen.Move(queenCellTo);
-                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         return;
                     }
                 }
@@ -289,14 +277,13 @@ namespace ChessEngineLogic
                         IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                     {
                         queen.Move(queenCellTo);
-
-                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         if (IsStaleMate())
                         {
                             queen.Move(queenCellFrom);
-                            UpdatePosition(queen, queenCellTo, queenCellFrom);
                             _turn = queen.Color;
+                            UpdatePosition(queen, queenCellTo, queenCellFrom);
                             continue;
                         }
 
@@ -317,7 +304,7 @@ namespace ChessEngineLogic
         /// <returns>True if moved, False if no case mathced</returns>
         private void PressingLeft()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
             King king = GetTheKing(_turn);
@@ -341,8 +328,8 @@ namespace ChessEngineLogic
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         return;
                     }
                 }
@@ -364,8 +351,8 @@ namespace ChessEngineLogic
                     }
 
                     rook.Move(rookCellTo);
-                    UpdatePosition(rook, rookCellFrom, rookCellTo);
                     _turn = oppositeColor;
+                    UpdatePosition(rook, rookCellFrom, rookCellTo);                   
                     return;
                 }
             }
@@ -380,8 +367,8 @@ namespace ChessEngineLogic
                         IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                     {
                         queen.Move(queenCellTo);
-                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         return;
                     }
                 }
@@ -397,14 +384,13 @@ namespace ChessEngineLogic
                         IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                     {
                         queen.Move(queenCellTo);
-
-                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         if (IsStaleMate())
                         {
                             queen.Move(queenCellFrom);
-                            UpdatePosition(queen, queenCellTo, queenCellFrom);
                             _turn = queen.Color;
+                            UpdatePosition(queen, queenCellTo, queenCellFrom);
                             continue;
                         }
                         return;
@@ -424,7 +410,7 @@ namespace ChessEngineLogic
         /// <returns>True if moved, False if no case mathced</returns>
         private void PressingRight()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
             King king = GetTheKing(_turn);
@@ -447,8 +433,8 @@ namespace ChessEngineLogic
                     if (IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo))
                     {
                         rook.Move(rookCellTo);
-                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         return;
                     }
                 }
@@ -470,8 +456,8 @@ namespace ChessEngineLogic
                     }
 
                     rook.Move(rookCellTo);
-                    UpdatePosition(rook, rookCellFrom, rookCellTo);
                     _turn = oppositeColor;
+                    UpdatePosition(rook, rookCellFrom, rookCellTo);
                     return;
 
                 }
@@ -487,8 +473,8 @@ namespace ChessEngineLogic
                         IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                     {
                         queen.Move(queenCellTo);
-                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         return;
                     }
                 }
@@ -504,14 +490,14 @@ namespace ChessEngineLogic
                         IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                     {
                         queen.Move(queenCellTo);
-
-                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(queen, queenCellFrom, queenCellTo);
                         if (IsStaleMate())
                         {
                             queen.Move(queenCellFrom);
-                            UpdatePosition(queen, queenCellTo, queenCellFrom);
                             _turn = queen.Color;
+                            UpdatePosition(queen, queenCellTo, queenCellFrom);
+                            
                             continue;
                         }
                         return;
@@ -531,8 +517,8 @@ namespace ChessEngineLogic
         /// <returns>True if moveing queen can result in Mate, False if no Mate situation is possible for this positing</returns>
         private bool TryWinningWithQueenMove()
         {
-            CellColor playerColor = _turn;
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color playerColor = _turn;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
             Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
@@ -553,7 +539,6 @@ namespace ChessEngineLogic
                     if (IsMate())
                     {
                         UpdatePosition(queen, cellFrom, cellTo);
-
                         return true;
                     }
                     else
@@ -573,7 +558,7 @@ namespace ChessEngineLogic
         /// <returns>True if moveing rook can result in Mate, False if no Mate situation is possible for this positing</returns>
         private bool TryWinningWithRookMove()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
             Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
@@ -597,7 +582,7 @@ namespace ChessEngineLogic
                     else
                     {
                         rook.Move(cellFrom);
-                        _turn = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+                        _turn = _turn == Color.White ? Color.Black : Color.White;
                     }
                 }
             }
@@ -611,7 +596,7 @@ namespace ChessEngineLogic
         /// <returns>True if moveing rook can result in Mate, False if no Mate situation is possible for this positing</returns>
         private bool TryWinningWithKingMove()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
             Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
@@ -636,7 +621,7 @@ namespace ChessEngineLogic
                     else
                     {
                         king.Move(cellFrom);
-                        _turn = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+                        _turn = _turn == Color.White ? Color.Black : Color.White;
                     }
                 }
             }
@@ -650,7 +635,7 @@ namespace ChessEngineLogic
         /// <returns>True if moved, False if no need to move</returns>
         private bool TrySavingRook()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
             King oppositeKing = GetTheKing(oppositeColor);
 
             Queen queen = GetFigure(typeof(Queen), _turn) as Queen;
@@ -701,7 +686,6 @@ namespace ChessEngineLogic
                                     if (!(IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo)))
                                     {
                                         rookCellTo = new Cell(rookCellFrom.Letter, king.CurrentCell.Number + 1);
-
                                     }
                                 }
                                 else
@@ -711,15 +695,14 @@ namespace ChessEngineLogic
                                     if (!(IsPossibleToMove(rook, rookCellTo) && IsFreeCell(rookCellTo)))
                                     {
                                         rookCellTo = new Cell(rookCellFrom.Letter, king.CurrentCell.Number - 1);
-
                                     }
                                 }
                                 break;
                         }
 
                         rook.Move(rookCellTo);
-                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         _turn = oppositeColor;
+                        UpdatePosition(rook, rookCellFrom, rookCellTo);
                         return true;
                     }
                 }
@@ -733,7 +716,7 @@ namespace ChessEngineLogic
         /// <returns></returns>
         private bool TryMovingKing()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
 
             King king = GetTheKing(_turn);
             Cell kingCellFrom = king.CurrentCell;
@@ -759,8 +742,8 @@ namespace ChessEngineLogic
                         if (IsPossibleToMove(king, kingCellTo) && IsFreeCell(kingCellTo))
                         {
                             king.Move(kingCellTo);
-                            UpdatePosition(king, kingCellFrom, kingCellTo);
                             _turn = oppositeColor;
+                            UpdatePosition(king, kingCellFrom, kingCellTo);
                             return true;
                         }
 
@@ -783,8 +766,8 @@ namespace ChessEngineLogic
                         if (IsPossibleToMove(king, kingCellTo) && IsFreeCell(kingCellTo))
                         {
                             king.Move(kingCellTo);
-                            UpdatePosition(king, kingCellFrom, kingCellTo);
                             _turn = oppositeColor;
+                            UpdatePosition(king, kingCellFrom, kingCellTo);
                             return true;
                         }
                     }
@@ -800,7 +783,7 @@ namespace ChessEngineLogic
         /// <returns></returns>
         private bool TryMovingQueen()
         {
-            CellColor oppositeColor = _turn == CellColor.White ? CellColor.Black : CellColor.White;
+            Color oppositeColor = _turn == Color.White ? Color.Black : Color.White;
 
             King oppositeKing = GetTheKing(oppositeColor);
             Cell kingCellFrom = oppositeKing.CurrentCell;
@@ -818,8 +801,8 @@ namespace ChessEngineLogic
                             queenCellTo != queenCellFrom && IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                         {
                             queen.Move(queenCellTo);
-                            UpdatePosition(queen, queenCellFrom, queenCellTo);
                             _turn = oppositeColor;
+                            UpdatePosition(queen, queenCellFrom, queenCellTo);
                             return true;
                         }
                     }
@@ -833,8 +816,8 @@ namespace ChessEngineLogic
                             queenCellTo != queenCellFrom && IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                         {
                             queen.Move(queenCellTo);
-                            UpdatePosition(queen, queenCellFrom, queenCellTo);
                             _turn = oppositeColor;
+                            UpdatePosition(queen, queenCellFrom, queenCellTo);
                             return true;
                         }
                     }
@@ -855,8 +838,8 @@ namespace ChessEngineLogic
                                     IsPossibleToMove(queen, queenCellTo) && IsFreeCell(queenCellTo))
                                 {
                                     queen.Move(queenCellTo);
-                                    UpdatePosition(queen, queenCellFrom, queenCellTo);
                                     _turn = oppositeColor;
+                                    UpdatePosition(queen, queenCellFrom, queenCellTo);
                                     return true;
                                 }
                             }

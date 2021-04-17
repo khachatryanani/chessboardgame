@@ -69,26 +69,24 @@ namespace KingdomChessGame_Desktop
             switch (choice)
             {
                 case 0:
-                    break;
+                    return;
                 case 1:
                     _manager.FiguresForGame = new List<string> { "BK", "WK", "BQ", "WQ", "BR","WR", "BR", "WR", "BN","WN", "BN", "WN", "BB","WB", "BB", "WB",
                 "BP", "WP", "BP","WP","BP","WP","BP","WP", "BP", "WP","BP","WP","BP","WP","BP","WP" };
-
-                    InitializeFigureHolder();
                     break;
                 case 2:
 
                     _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR" };
-                    InitializeFigureHolder();
                     break;
                 case 3:
                     _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR", "WR" };
                     break;
                 case 4:
                     _manager.FiguresForGame = new List<string> { "BNP", "BN" };
-                    InitializeFigureHolder();
                     break;
             }
+
+            InitializeFigureHolder();
             _manager.GameChoice = choice;
         }
 
@@ -136,7 +134,6 @@ namespace KingdomChessGame_Desktop
                 double top = position.Y;
 
                 Image image = sender as Image;
-
                 image.Width = 80;
                 image.Height = 80;
                 image.Margin = new Thickness(left - image.Width / 2, top - image.Height / 2, 0, 0);
@@ -173,7 +170,7 @@ namespace KingdomChessGame_Desktop
                     {
                         _manager.Play(cellFrom, cellTo);
                         _manager.InsertImage(image, grid);
-
+                        MessageBox.Text = _manager.MessageText;
                         return;
                     }
                 }
@@ -201,12 +198,13 @@ namespace KingdomChessGame_Desktop
         private void StartBtn_Click(object sender, RoutedEventArgs e)
         {
             int choice = GameChoiceCombo.SelectedIndex;
-            switch (choice)
+            if (_manager.AreAllFiguresOnBoard())
             {
-                case 2:
-                case 3:
-                    if (_manager.AreAllFiguresOnBoard())
-                    {
+                switch (choice)
+                {
+                    // Play winning algorithms
+                    case 2:
+                    case 3:
                         foreach (var image in _manager.FigureImages)
                         {
                             if (image.Name[0] == 'B')
@@ -224,12 +222,38 @@ namespace KingdomChessGame_Desktop
 
                             _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
                         }
-                    }
-                    break;
-                default:
-                    _manager.Play();
-                    break;
+
+                        break;
+                    // Play Knight moves
+                    case 4:
+                        string cellFrom = (string)_manager.FigureImages[1].Tag;
+                        string cellTo = (string)_manager.FigureImages[0].Tag;
+                        _manager.Play(cellFrom, cellTo);
+                        break;
+                }
+
+                MessageBox.Text = _manager.MessageText;
             }
+        }
+
+        /// <summary>
+        /// Puts the figure images in figure holder into their chess game default positions.
+        /// </summary>
+        /// <param name="sender">Button object</param>
+        /// <param name="e">RoutedEventArgs arguments</param>
+        private void DefaultSetBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _manager.PutFigureOnDefaultPosition();
+        }
+
+        /// <summary>
+        /// Resets the game and clears the board.
+        /// </summary>
+        /// <param name="sender">Button object</param>
+        /// <param name="e">RoutedEventArgs arguments</param>
+        private void ResetBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _manager.ResetGame();
         }
     }
 }

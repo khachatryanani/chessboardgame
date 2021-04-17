@@ -48,7 +48,7 @@ namespace ChessBoard
         /// <param name="cellToMove">Cell to verify for Chess Check</param>
         /// <param name="colorOfPlayer">Color of current player</param>
         /// <returns>True if the given cell falls under Check of opposite figures, False if it does not</returns>
-        public static bool IsUnderCheckCell(Cell cellToMove, CellColor colorOfPlayer)
+        public static bool IsUnderCheckCell(Cell cellToMove, Color colorOfPlayer)
         {
             foreach (var item in _board)
             {
@@ -75,7 +75,7 @@ namespace ChessBoard
         /// <param name="cellToCheck">Cell to check if there is an influence on</param>
         /// <param name="colorOfPlayer">Color of the current player</param>
         /// <returns>True if the cell is in the influeneced cells of the opposite player, False if it does not</returns>
-        public static bool IsInfluencedCell(Cell cellToCheck, CellColor colorOfPlayer)
+        public static bool IsInfluencedCell(Cell cellToCheck, Color colorOfPlayer)
         {
             foreach (var item in _board)
             {
@@ -257,7 +257,7 @@ namespace ChessBoard
         /// </summary>
         /// <param name="colorOfKing">Color of King object to return</param>
         /// <returns>King object if found, null if not</returns>
-        public static King GetTheKing(CellColor colorOfKing)
+        public static King GetTheKing(Color colorOfKing)
         {
             foreach (var item in _board)
             {
@@ -277,7 +277,7 @@ namespace ChessBoard
         /// <param name="colorofFigure">Color of figure to get</param>
         /// <param name="order">Gives the figure of the order if there are more than one figures of a type</param>
         /// <returns>Figure object from the chess board container</returns>
-        public static Figure GetFigure(Type typeOfFigure, CellColor colorofFigure, int order = 1)
+        public static Figure GetFigure(Type typeOfFigure, Color colorofFigure, int order = 1)
         {
             foreach (var item in _board)
             {
@@ -291,6 +291,16 @@ namespace ChessBoard
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Checks if the gicen Cell is within the board limits
+        /// </summary>
+        /// <param name="cell">Cell object to check</param>
+        /// <returns>True is the cell is within the board limit, False if it is not.</returns>
+        public static bool IsValidCell(Cell cell) 
+        {
+            return cell.Letter <= 72 && cell.Letter >= 65 && cell.Number <= 8 && cell.Number >= 1;
         }
 
         /// <summary>

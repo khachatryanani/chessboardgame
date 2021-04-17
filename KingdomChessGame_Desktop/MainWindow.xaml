@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KingdomChessGame_Desktop"
         mc:Ignorable="d"
-        Title="Chess Board Game" Height="820" Width="1000" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" >
+        Title="Kingdom Chess" Height="820" Width="800" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" >
     <Grid x:Name="MainGrid">
         <!--images-->
         <Image x:Name="BG" Source="/Pattern.png" Stretch="Fill" />
-        <Image Name="WHolder" Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,22,0,0" Height="96" Width="489" />
-        <Image Name="BHolder"   Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,671,0,0" Height="96" Width="489" />
+        <Image Name="WHolder" Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,19,0,0" Height="96" Width="489" />
+        <Image Name="BHolder"   Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,668,0,0" Height="96" Width="489" />
 
         <!--labels-->
         <Label Content="8" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,159,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
@@ -29,26 +29,14 @@
         <Label Content="F" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="571,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
         <Label Content="G" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="630,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
         <Label Content="H" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="689,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label x:Name="MovesLog" Content="Moves Log" HorizontalContentAlignment="Center" FontSize="18" Foreground="White" HorizontalAlignment="Left" Margin="780,111,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="MessageLabel" Content="Message Box" HorizontalContentAlignment="Center" FontSize="18" Foreground="White" HorizontalAlignment="Left" Margin="780,376,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="MessageLabel" Content="Message Box" HorizontalContentAlignment="Center" FontSize="18" Foreground="White" HorizontalAlignment="Left" Margin="24,376,0,0" VerticalAlignment="Top"/>
 
         <!--textblocks-->
-        <Grid x:Name="LogGrid" Visibility="Visible" Background="Wheat" Margin="780,150,0,0" Height="200" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" 
-                  VerticalScrollBarVisibility="Auto"
-                  Name="Scroller">
-                <TextBlock x:Name="Logger" HorizontalAlignment="Stretch" Foreground="DarkOliveGreen"
-                   VerticalAlignment="Stretch"
-                   MinWidth="100" Padding="10"
-                   Width="{Binding ElementName=Scroller, Path=ViewportWidth}"
-                   TextWrapping="Wrap"/>
-            </ScrollViewer>
-        </Grid>
-        <TextBlock Name="MessageBox" Background="Wheat" Foreground="DarkOliveGreen" Padding="10" TextWrapping="Wrap" Width="180" Height="100" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="780,410,0,0"></TextBlock>
+        <TextBlock Name="MessageBox" Background="Wheat" Foreground="DarkOliveGreen" Padding="10" TextWrapping="Wrap" Width="180" Height="73" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="24,410,0,0"></TextBlock>
 
         <!--buttons-->
-        <Button x:Name="ResetBtn" Content="Reset Board" FontSize="18"  Foreground="White" BorderThickness="0" Background="#F85F9E" HorizontalAlignment="Left" Height="50" Margin="24,247,0,0" VerticalAlignment="Top" Width="180" />
-        <Button x:Name="DefaultSetBtn" Content="Set Default Board" Foreground="White" BorderThickness="0" Background="#F6D02F" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,192,0,0"  VerticalAlignment="Top" Width="180" />
+        <Button x:Name="ResetBtn" Content="Reset Game" FontSize="18"  Foreground="White" BorderThickness="0" Background="#F85F9E" HorizontalAlignment="Left" Height="50" Margin="24,247,0,0" VerticalAlignment="Top" Width="180"/>
+        <Button x:Name="DefaultSetBtn" Content="Set Default Board" Foreground="White" BorderThickness="0" Background="#F6D02F" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,192,0,0"  VerticalAlignment="Top" Width="180" Click="DefaultSetBtn_Click"/>
         <Button x:Name="StartBtn" Content="Start the Game" Foreground="White" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,302,0,0" BorderThickness="0" Background="#67D07D" VerticalAlignment="Top" Width="180" Click="StartBtn_Click"/>
 
         <!--comboboxes-->

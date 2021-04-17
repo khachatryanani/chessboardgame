@@ -4,7 +4,7 @@ namespace ChessBoard.BoardAttributes
     /// <summary>
     /// Represents a color in chessboard
     /// </summary>
-    public enum CellColor
+    public enum Color
     {
         White,
         Black

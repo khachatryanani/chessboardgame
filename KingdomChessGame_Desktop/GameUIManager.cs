@@ -17,17 +17,16 @@ namespace KingdomChessGame_Desktop
         /// <summary>
         /// Chess Engine that is responsible for game logic
         /// </summary>
-        private readonly ChessEngine _engine;
-
+        private ChessEngine _engine;
 
         /// <summary>
         /// Predefined colors for board cells on UI
         /// </summary>
-        private readonly Brush _selectedBlackColor;
-        private readonly Brush _selectedWhiteColor;
-        private readonly Brush _blackColor;
+        private readonly Brush _selectedBlackColor = (Brush)(new BrushConverter().ConvertFrom("#F85F9E"));
+        private readonly Brush _selectedWhiteColor = (Brush)(new BrushConverter().ConvertFrom("#FDB6B6"));
+        private readonly Brush _blackColor = (Brush)(new BrushConverter().ConvertFrom("#67D07D"));
 
-
+        public string MessageText { get; set; }
 
         /// <summary>
         /// Holds the string representations of Figure names that are to be created for the current game.
@@ -54,17 +53,31 @@ namespace KingdomChessGame_Desktop
         /// </summary>
         public GameUIManager()
         {
+            SetNewGame();
+        }
+
+        /// <summary>
+        /// Initializes the objecs required for the game.
+        /// </summary>
+        private void SetNewGame() 
+        {
             FiguresForGame = new List<string>();
             FigureImages = new List<Image>();
             GridBoard = new List<Grid>();
 
+            // To be changed into a dynamic choice
             _engine = new ChessEngine("Black");
-            _engine.FigureMoved += FigureMoved;
+            _engine.FigureMoved += FigureMove;
 
-            _selectedBlackColor = (Brush)(new BrushConverter().ConvertFrom("#F85F9E"));
-            _selectedWhiteColor = (Brush)(new BrushConverter().ConvertFrom("#FDB6B6"));
-            _blackColor = (Brush)(new BrushConverter().ConvertFrom("#67D07D"));
+        }
 
+        /// <summary>
+        /// Resets the objecs required for the game.
+        /// </summary>
+        public void ResetGame() 
+        {
+            SetNewGame();
+            
         }
 
         /// <summary>
@@ -109,12 +122,11 @@ namespace KingdomChessGame_Desktop
         }
 
         /// <summary>
-        /// EventHandler method that is subscribed to figure moves: on any figure move updates the UI accordingly.
+        ///  EventHandler method that is subscribed to figure moves: on any figure move updates the UI accordingly.
         /// </summary>
-        /// <param name="figureName">Name of the figure that moved</param>
-        /// <param name="cellFrom">Chess board cell from which figure moved.</param>
-        /// <param name="cellTo">Chess board cell to which figure moved.</param>
-        private void FigureMoved(object sender, GameEventArgs e)
+        /// <param name="sender">Chess Engine object</param>
+        /// <param name="e">GameEvent arguments</param>
+        private void FigureMove(object sender, GameEventArgs e)
         {
             double top = GetGridByName(e.CellTo).Margin.Top;
             double left = GetGridByName(e.CellTo).Margin.Left;
@@ -123,6 +135,8 @@ namespace KingdomChessGame_Desktop
 
             image.Margin = new Thickness(left, top, 0, 0);
             image.Tag = e.CellTo;
+            
+            this.MessageText = GetMessageTextForDefaultGame(e.GameStatus, e.CurrentPlayer, e.WinnerPlayer);
         }
 
         /// <summary>
@@ -155,6 +169,28 @@ namespace KingdomChessGame_Desktop
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets the game info and returns the relevant game message.
+        /// </summary>
+        /// <param name="status">Status of the game: 0 = usual, 1 = check, 2 = mate, 3 = stalemate</param>
+        /// <param name="currentPlayer">Current player's color</param>
+        /// <param name="winner">Winner's color if any winner.</param>
+        /// <returns>Message text</returns>
+        public string GetMessageTextForDefaultGame(int status, string currentPlayer, string winner) 
+        {
+            switch (status) 
+            {
+                case 1:
+                    return $"{currentPlayer} King is under check.";
+                case 2:
+                    return $"Mate! {winner} win.";
+                case 3:
+                    return "Stalemate...";
+                default:
+                    return $"Good luck! {currentPlayer}'s turn to play.";
+            }
         }
 
         /// <summary>
@@ -211,26 +247,27 @@ namespace KingdomChessGame_Desktop
         /// <param name="cellTo">Name of the grid the figure moved to.</param>
         public void Play(string cellFrom, string cellTo)
         {
-            _engine.PlayUser(cellFrom, cellTo);
-            _engine.PlayEngine(GameChoice);
-        }
-
-        /// <summary>
-        /// Plays the other games available in Chess Engine.
-        /// </summary>
-        public void Play()
-        {
-            if (GameChoice == 4)
+            switch (GameChoice) 
             {
-                var moves = _engine.PlayMinKinghtMovesAlgorithm((string)FigureImages[1].Tag, (string)FigureImages[0].Tag);
-                Grid[] grids = new Grid[moves.Count];
-                for (int i = 0; i < moves.Count; i++)
-                {
-                    grids[i] = GetGridByName(moves[i]);
-
-                }
-
-                AnimateMoveKnight(FigureImages[1], grids);
+                case 4:
+                    var moves = _engine.PlayMinKinghtMovesAlgorithm(cellFrom, cellTo);
+                    Grid[] grids = new Grid[moves.Count];
+                    for (int i = 0; i < moves.Count; i++)
+                    {
+                        grids[i] = GetGridByName(moves[i]);
+                    }
+                    this.MessageText = $"Knight needs {moves.Count - 1} move(s) to reach from " +
+                                       $"{(string)FigureImages[1].Tag} to {(string)FigureImages[0].Tag}";
+                    AnimateMoveKnight(FigureImages[1], grids);
+                    break;
+                case 2:
+                    _engine.PlayUser(cellFrom, cellTo);
+                    _engine.PlayWinningWithQueenAndRookAlgorithm();
+                    break;
+                case 3:
+                    _engine.PlayUser(cellFrom, cellTo);
+                    _engine.PlayWinningWithQueenAndTwoRooksAlgorithm();
+                    break;
             }
         }
 
@@ -400,6 +437,7 @@ namespace KingdomChessGame_Desktop
         public void CreateFigure(string cellString, string typeString, string colorString)
         {
             _engine.CreateFigure(cellString, typeString, colorString);
+            this.MessageText = GetMessageTextForDefaultGame(0, "Black", string.Empty);
         }
 
         /// <summary>
@@ -422,6 +460,111 @@ namespace KingdomChessGame_Desktop
                     Task.Delay(1000).Wait();
                 });
             }
+        }
+
+        /// <summary>
+        /// Puts the image on its default position on the chess board
+        /// </summary>
+        /// <param name="figureImage">Figure's image to put on its default position on chess board</param>
+        public void PutFigureOnDefaultPosition()
+        {
+            foreach (var figureImage in FigureImages)
+            {
+                figureImage.Width = 60;
+                figureImage.Height = 60;
+                Grid grid;
+
+                if (figureImage.Name[0] == 'W')
+                {
+                    switch (figureImage.Name[1])
+                    {
+                        case 'K':
+                            grid = GetEmtpyGridByName("E1");
+                            break;
+                        case 'Q':
+                            grid = GetEmtpyGridByName("D1");
+                            break;
+                        case 'B':
+                            grid = GetEmtpyGridByName("C1") ?? GetEmtpyGridByName("F1");
+                            break;
+                        case 'N':
+                            grid = GetEmtpyGridByName("B1") ?? GetEmtpyGridByName("G1");
+                            break;
+                        case 'R':
+                            grid = GetEmtpyGridByName("A1") ?? GetEmtpyGridByName("H1");
+                            break;
+                        default:
+                            grid = GetEmtpyGridByName("A2") ?? GetEmtpyGridByName("B2") ?? GetEmtpyGridByName("C2") ?? GetEmtpyGridByName("D2") ??
+                                 GetEmtpyGridByName("E2") ?? GetEmtpyGridByName("F2") ?? GetEmtpyGridByName("G2") ?? GetEmtpyGridByName("H2");
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (figureImage.Name[1])
+                    {
+                        case 'K':
+                            grid = GetEmtpyGridByName("E8");
+                            break;
+                        case 'Q':
+                            grid = GetEmtpyGridByName("D8");
+                            break;
+                        case 'B':
+                            grid = GetEmtpyGridByName("C8") ?? GetEmtpyGridByName("F8");
+                            break;
+                        case 'N':
+                            grid = GetEmtpyGridByName("B8") ?? GetEmtpyGridByName("G8");
+                            break;
+                        case 'R':
+                            grid = GetEmtpyGridByName("A8") ?? GetEmtpyGridByName("H8");
+                            break;
+                        default:
+                            grid = GetEmtpyGridByName("A7") ?? GetEmtpyGridByName("B7") ?? GetEmtpyGridByName("C7") ?? GetEmtpyGridByName("D7") ??
+                                 GetEmtpyGridByName("E7") ?? GetEmtpyGridByName("F7") ?? GetEmtpyGridByName("G7") ?? GetEmtpyGridByName("H7");
+                            InsertImage(figureImage, grid);
+                            break;
+                    }
+                }
+
+                InsertImage(figureImage, grid);
+            }
+        }
+
+        /// <summary>
+        /// Gets a grid if it's empty
+        /// </summary>
+        /// <param name="name">Name of the grid to get</param>
+        /// <returns>Grid if it is empty, Null if the grid was not found or was not empty</returns>
+        private Grid GetEmtpyGridByName(string name)
+        {
+            foreach (var grid in GridBoard)
+            {
+                if (grid.Name == name && IsEmptyGrid(grid))
+                {
+                    return grid;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks if there is an image standing on the grid.
+        /// </summary>
+        /// <param name="grid">Grid to check.</param>
+        /// <returns>True if there is no image on the grid, False if there is a one.</returns>
+        private bool IsEmptyGrid(Grid grid) 
+        {
+            string gridName = grid.Name;
+            foreach (var image in FigureImages)
+            {
+                if ((string)image.Tag == gridName) 
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

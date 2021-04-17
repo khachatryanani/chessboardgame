@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using ChessBoard.BoardAttributes;
+using ChessBoard.Figures;
+using ChessBoard.Extensions;
+using static ChessBoard.ChessBoardManager;
+
 
 namespace ChessEngineLogic
 {
@@ -17,58 +21,107 @@ namespace ChessEngineLogic
 
         private List<string> GetPath(Cell cellFrom, Cell cellTo)
         {
+
             // Get the relative positing of knight cell to the target cell
             int number = Math.Abs(cellTo.Number - cellFrom.Number);
             int letter = Math.Abs(cellTo.Letter - cellFrom.Letter);
 
+            bool isReverted = false;
+            Cell target = cellTo;
+            Cell start = cellFrom;
 
-            var cells = GetKnightMoveCells(number, letter);
-            var coefs = GetCoefficiants(cellFrom, cellTo);
-            List<string> path = new List<string>();
-            foreach (var item in cells)
+            if (cellTo.Letter >= cellFrom.Letter && cellTo.Number <= cellFrom.Number) 
             {
-                Cell pathCell = new Cell((char)(cellTo.Letter + (coefs.Item2 * item.Item2)), cellTo.Number + (coefs.Item1 * item.Item1));
-                if (pathCell.Number > 8)
-                {
-
-                    pathCell.Number -= 2 * (Math.Abs(cellFrom.Number - pathCell.Number));
-                }
-                else if (pathCell.Number < 1)
-                {
-                    pathCell.Number += 2 * (Math.Abs(cellFrom.Number - pathCell.Number));
-                }
-
-                if (pathCell.Letter > 72)
-                {
-                    pathCell.Letter -= (char)(2 * (Math.Abs(cellFrom.Letter - pathCell.Letter)));
-                }
-                else if (pathCell.Letter < 65)
-                {
-                    pathCell.Letter += (char)(2 * (Math.Abs(cellFrom.Letter - pathCell.Letter)));
-                }
-
-                //if (cellFrom.Letter < cellTo.Letter || cellFrom.Number > cellTo.Number) 
-                //{
-                //    pathCell.Number -= 2 * (Math.Abs(cellFrom.Number - pathCell.Number));
-                //}
-
-                //if (cellFrom.Letter < cellTo.Letter)
-                //{
-                //    pathCell.Letter += (char)(2 * (Math.Abs(cellFrom.Letter - pathCell.Letter)));
-                //}
-                path.Add(pathCell.ToString());
-                cellFrom = pathCell;
+                isReverted = true;
+                target = cellFrom;
+                start = cellTo;
             }
 
+            Knight knight = new Knight(start, Color.Black);
+            var cells = GetKnightMoveRelativeCells(number, letter);
+            
+            List<string> path = new List<string>();
+
+            foreach (var cell in cells)
+            {
+                var point = new Cell((char)(target.Letter + cell.Item1), target.Number + cell.Item2);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point)) 
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                    continue;
+                }
+
+                point = new Cell((char)(target.Letter - cell.Item1), target.Number + cell.Item2);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                    continue;
+                }
+
+                point = new Cell((char)(target.Letter + cell.Item1), target.Number - cell.Item2);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                    continue;
+                }
+
+                point = new Cell((char)(target.Letter - cell.Item1), target.Number - cell.Item2);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                    continue;
+                }
+
+                point = new Cell((char)(target.Letter + cell.Item2), target.Number + cell.Item1);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                    continue;
+                }
+
+                point = new Cell((char)(target.Letter - cell.Item2), target.Number + cell.Item1);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                    continue;
+                }
+
+                point = new Cell((char)(target.Letter + cell.Item2), target.Number - cell.Item1);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                    continue;
+                }
+
+                point = new Cell((char)(target.Letter - cell.Item2), target.Number - cell.Item1);
+                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                {
+                    knight.Move(point);
+                    path.Add(point.ToString());
+                }
+            }
+
+            if (isReverted) 
+            {
+                path.Reverse();
+            }
             return path;
         }
 
-        private List<(int, int)> GetKnightMoveCells(int number, int letter)
+        
+        private List<(int, int)> GetKnightMoveRelativeCells(int number, int letter)
         {
             int[,] template = CreateTemplate();
             int moves = template[number, letter];
             List<(int, int)> cells = new List<(int, int)>();
-
+            cells.Add((number, letter));
             for (int i = moves - 1; i >= 0; i--)
             {
                 if (number - 2 >= 0 && letter - 1 >= 0 && template[number - 2, letter - 1] == i)
@@ -139,101 +192,6 @@ namespace ChessEngineLogic
             };
 
             return fixedTemplate;
-        }
-
-        private (int, int) GetCoefficiants(Cell cellFrom, Cell cellTo)
-        {
-            
-            //if (cellTo.Letter <= cellFrom.Letter && cellTo.Letter < 69)
-            //{
-            //    if (cellTo.Number <= cellFrom.Number && cellTo.Number < 5)
-            //    {
-            //        return (1, 1);
-            //    }
-            //    else
-            //    {
-            //        return (-1, 1);
-            //    }
-            //}
-            //else
-            //{
-            //    if (cellTo.Number <= cellFrom.Number && cellTo.Number > 4)
-            //    {
-            //        return (1, -1);
-            //    }
-            //    else
-            //    {
-            //        return (-1, -1);
-            //    }
-            //}
-
-            //if (cellTo.Letter <= cellFrom.Letter && cellTo.Number <= cellFrom.Number)
-            //{
-            //    return (1, 1);
-            //}
-
-            //if (cellTo.Letter > cellFrom.Letter && cellTo.Number <= cellFrom.Number)
-            //{
-            //    return (1, -1);
-            //}
-
-            //if (cellTo.Letter <= cellFrom.Letter && cellTo.Number > cellFrom.Number)
-            //{
-            //    return (-1, 1);
-            //}
-
-            //if (cellTo.Letter > cellFrom.Letter && cellTo.Number > cellFrom.Number)
-            //{
-            //    return (-1, -1);
-            //}
-            //return (0, 0);
-
-            //if (cellTo.Letter <= 69)
-            //{
-            //    if (cellTo.Number >= 5 ||)
-            //    {
-            //        return (-1, 1);
-            //    }
-            //    else
-            //    {
-            //        return (1, 1);
-            //    }
-            //}
-            //else 
-            //{
-            //    if (cellTo.Number >= 5)
-            //    {
-            //        return (-1, -1);
-            //    }
-            //    else
-            //    {
-            //        return (1, -1);
-            //    }
-            //}
-
-            if (cellTo.Letter <= cellFrom.Letter)
-            {
-                if (cellTo.Number <= cellFrom.Number)
-                {
-                    return (1, 1);
-                }
-                else
-                {
-                    return (-1, 1);
-                }
-            }
-            else 
-            {
-                if (cellTo.Number <= cellFrom.Number)
-                {
-                    return (1, -1);
-                }
-                else
-                {
-                    return (-1, -1);
-                }
-            }
-
         }
     }
 }
