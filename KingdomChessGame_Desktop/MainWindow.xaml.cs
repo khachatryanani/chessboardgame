@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace KingdomChessGame_Desktop
 {
@@ -20,7 +22,6 @@ namespace KingdomChessGame_Desktop
 
         private bool PlayingWithWhites { get; set; }
 
-        private Grid UppderGrid { get; set; }
 
         public MainWindow()
         {
@@ -74,31 +75,6 @@ namespace KingdomChessGame_Desktop
         /// </summary>
         /// <param name="sender">Combobox object</param>
         /// <param name="e">SelectionChangedEventArgs argument</param>
-        private void GameChoiceCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            int choice = (sender as ComboBox).SelectedIndex;
-            switch (choice)
-            {
-                case 0:
-                    return;
-                case 1:
-                    _manager.FiguresForGame = new List<string> { "BK", "WK", "BQ", "WQ", "BR","WR", "BR", "WR", "BN","WN", "BN", "WN", "BB","WB", "BB", "WB",
-                "BP", "WP", "BP","WP","BP","WP","BP","WP", "BP", "WP","BP","WP","BP","WP","BP","WP" };
-                    break;
-                case 2:
-                    _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR" };
-                    break;
-                case 3:
-                    _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR", "WR" };
-                    break;
-                case 4:
-                    _manager.FiguresForGame = new List<string> { "BNP", "BN" };
-                    break;
-            }
-
-            InitializeFigureHolder();
-            _manager.GameChoice = choice;
-        }
 
         /// <summary>
         /// On mouse up places the image on the center of relevant grid.
@@ -112,10 +88,9 @@ namespace KingdomChessGame_Desktop
             double left = position.X;
             double top = position.Y;
 
-            Image image = sender as Image;
             MovingImage.Width = 60;
             MovingImage.Height = 60;
-           
+
 
             foreach (var grid in _manager.GridBoard)
             {
@@ -138,7 +113,7 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">MouseEventArgs argument</param>
         private void Figure_MouseMove(object sender, MouseEventArgs e)
         {
-            if (MovingImage != null) 
+            if (MovingImage != null)
             {
                 if (e.LeftButton == MouseButtonState.Pressed)
                 {
@@ -147,7 +122,6 @@ namespace KingdomChessGame_Desktop
                     double left = position.X;
                     double top = position.Y;
 
-                    //Image image = sender as Image;
                     MovingImage.Width = 80;
                     MovingImage.Height = 80;
                     MovingImage.Margin = new Thickness(left - MovingImage.Width / 2, top - MovingImage.Height / 2, 0, 0);
@@ -162,7 +136,7 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">MouseButtonEventArgs argument</param>
         private void Figure_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (MovingImage == null) 
+            if (MovingImage == null)
             {
                 return;
             }
@@ -177,7 +151,7 @@ namespace KingdomChessGame_Desktop
 
             MovingImage.Width = 60;
             MovingImage.Height = 60;
-            
+
             string cellFrom = (string)MovingImage.Tag;
 
             _manager.RemoveHelpers(cellFrom);
@@ -195,7 +169,7 @@ namespace KingdomChessGame_Desktop
 
                         PlayingWithWhites = !PlayingWithWhites;
                         LetPlayerMoveImages(PlayingWithWhites);
-                       
+
                         MovingImage = null;
 
                         MessageBox.Text = _manager.MessageText;
@@ -215,11 +189,11 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">MouseButtonEventArgs argument</param>
         private void Figure_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if ((sender as Image)?.Tag == null) 
+            if ((sender as Image)?.Tag == null)
             {
                 return;
             }
-           
+
             MovingImage = sender as Image;
             int iZIndex = Canvas.GetZIndex(MovingImage);
             Canvas.SetZIndex(MovingImage, iZIndex + 1);
@@ -246,7 +220,7 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">RoutedEventArgs argument</param>
         private void StartBtn_Click(object sender, RoutedEventArgs e)
         {
-            int choice = GameChoiceCombo.SelectedIndex;
+            int choice = _manager.GameChoice;
             if (_manager.AreAllFiguresOnBoard())
             {
                 switch (choice)
@@ -315,7 +289,7 @@ namespace KingdomChessGame_Desktop
             _manager.ResetGame();
         }
 
-        private void LetPlayerMoveImages(bool whitesTurn) 
+        private void LetPlayerMoveImages(bool whitesTurn)
         {
             if (whitesTurn)
             {
@@ -335,7 +309,7 @@ namespace KingdomChessGame_Desktop
                     }
                 }
             }
-            else 
+            else
             {
                 foreach (var image in _manager.FigureImages)
                 {
@@ -353,6 +327,84 @@ namespace KingdomChessGame_Desktop
                     }
                 }
             }
+        }
+
+        private void SetDefault_MouseEnter(object sender, MouseEventArgs e)
+        {
+            SetDefault.Source = new BitmapImage(new Uri(@"\Images\SetSelected.png", System.UriKind.Relative));
+        }
+
+        private void SetDefault_MouseLeave(object sender, MouseEventArgs e)
+        {
+            SetDefault.Source = new BitmapImage(new Uri(@"\Images\Set.png", System.UriKind.Relative));
+        }
+
+        private void Start_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Start.Source = new BitmapImage(new Uri(@"\Images\StartSelected.png", System.UriKind.Relative));
+        }
+
+        private void Start_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Start.Source = new BitmapImage(new Uri(@"\Images\Start.png", System.UriKind.Relative));
+        }
+
+        private void Reset_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Reset.Source = new BitmapImage(new Uri(@"\Images\ResetSelected.png", System.UriKind.Relative));
+        }
+
+        private void Reset_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Reset.Source = new BitmapImage(new Uri(@"\Images\Reset.png", System.UriKind.Relative));
+        }
+
+        private void Exit_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Exit.Source = new BitmapImage(new Uri(@"\Images\ExitSelected.png", System.UriKind.Relative));
+        }
+
+        private void Exit_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Exit.Source = new BitmapImage(new Uri(@"\Images\Exit.png", System.UriKind.Relative));
+        }
+
+        private void Exit_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void DefaultGame_Click(object sender, RoutedEventArgs e)
+        {
+            _manager.GameChoice = 1;
+            _manager.FiguresForGame = new List<string> { "BK", "WK", "BQ", "WQ", "BR","WR", "BR", "WR", "BN","WN", "BN", "WN", "BB","WB", "BB", "WB",
+                "BP", "WP", "BP","WP","BP","WP","BP","WP", "BP", "WP","BP","WP","BP","WP","BP","WP" };
+
+            InitializeFigureHolder();
+        }
+
+        private void QueenEndgame_Click(object sender, RoutedEventArgs e)
+        {
+            _manager.GameChoice = 2;
+            _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR" };
+
+            InitializeFigureHolder();
+        }
+
+        private void RookEndgame_Click(object sender, RoutedEventArgs e)
+        {
+            _manager.GameChoice = 3;
+            _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR", "WR" };
+
+            InitializeFigureHolder();
+        }
+
+        private void KnightGame_Click(object sender, RoutedEventArgs e)
+        {
+            _manager.GameChoice = 4;
+            _manager.FiguresForGame = new List<string> { "BNP", "BN" };
+
+            InitializeFigureHolder();
         }
     }
 }

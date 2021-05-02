@@ -23,9 +23,11 @@ namespace KingdomChessGame_Desktop
         /// <summary>
         /// Predefined colors for board cells on UI
         /// </summary>
-        private readonly Brush _selectedBlackColor = (Brush)(new BrushConverter().ConvertFrom("#F85F9E"));
-        private readonly Brush _selectedWhiteColor = (Brush)(new BrushConverter().ConvertFrom("#FDB6B6"));
-        private readonly Brush _blackColor = (Brush)(new BrushConverter().ConvertFrom("#67D07D"));
+        private readonly Brush _selectedBlackColor = (Brush)(new BrushConverter().ConvertFrom("#96944B"));
+        private readonly Brush _selectedWhiteColor = (Brush)(new BrushConverter().ConvertFrom("#C3B776"));
+        private readonly Brush _blackColor = (Brush)(new BrushConverter().ConvertFrom("#43655A"));
+        private readonly Brush _whiteColor = (Brush)(new BrushConverter().ConvertFrom("#A6B2BA"));
+
 
         public string MessageText { get; set; }
 
@@ -236,7 +238,7 @@ namespace KingdomChessGame_Desktop
             foreach (var cell in possibleMoves)
             {
                 Grid grid = GetGridByName(cell);
-                grid.Background = grid.Background == _selectedBlackColor ? _blackColor : Brushes.White;
+                grid.Background = grid.Background == _selectedBlackColor ? _blackColor : _whiteColor;
             }
         }
 
@@ -326,12 +328,12 @@ namespace KingdomChessGame_Desktop
         public List<Grid> CreateBoard()
         {
             Brush brushes = _blackColor;
-            int marginTop = 150;
+            int marginTop = 200;
 
             for (int i = 0; i < 8; i++)
             {
                 int marginLeft = 260;
-                brushes = brushes == _blackColor? Brushes.White : _blackColor;
+                brushes = brushes == _blackColor? _whiteColor : _blackColor;
                 for (int j = 0; j < 8; j++)
                 {
                     string number = (8 - i).ToString();
@@ -347,12 +349,13 @@ namespace KingdomChessGame_Desktop
                         HorizontalAlignment = HorizontalAlignment.Left,
                         Background = brushes,
                         IsEnabled = false,
+                        Opacity=0.85
                     };
 
                     GridBoard.Add(grid);
 
                     marginLeft += 59;
-                    brushes = brushes == _blackColor ? Brushes.White : _blackColor;
+                    brushes = brushes == _blackColor ? _whiteColor : _blackColor;
                 }
                 marginTop += 59;
             }
@@ -372,12 +375,12 @@ namespace KingdomChessGame_Desktop
 
             if (figureImageName[0] == 'B')
             {
-                marginTop = 30;
+                marginTop = 90;
 
             }
             else
             {
-                marginTop = 680;
+                marginTop = 730;
 
             }
 
@@ -554,14 +557,6 @@ namespace KingdomChessGame_Desktop
         /// <returns>Grid if it is empty, Null if the grid was not found or was not empty</returns>
         private Grid GetEmtpyGridByName(string name)
         {
-            //foreach (var grid in GridBoard)
-            //{
-            //    if (grid.Name == name && IsEmptyGrid(grid))
-            //    {
-            //        return grid;
-            //    }
-            //}
-
             return GridBoard.FirstOrDefault(grid => grid.Name == name && IsEmptyGrid(grid));
         }
 

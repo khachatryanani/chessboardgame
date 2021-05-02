@@ -5,62 +5,76 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KingdomChessGame_Desktop"
         mc:Ignorable="d"
-        Title="Kingdom Chess" Height="820" Width="800" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" >
-    <Grid x:Name="WindowGrid">
-        <Grid x:Name="MainGrid">
-        
-        <!--images-->
-        <Image x:Name="BG" Source="/Pattern.png" Stretch="Fill" />
-        <Image Name="WHolder" Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,19,0,0" Height="96" Width="489" />
-        <Image Name="BHolder"   Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,668,0,0" Height="96" Width="489" />
+        Title="Kingdom Chess" Height="820" Width="800" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" WindowStyle="None">
+    <Grid x:Name="WindowGrid" >
+        <Image x:Name="BG" Source="/BG.png" Stretch="Fill" />
+        <Grid Width="161" Height="820" VerticalAlignment="Center" HorizontalAlignment="Left" Background="#81989E" Opacity="0.8">
 
-        <!--labels-->
-        <Label Content="8" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,159,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="7" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,218,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="6" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,277,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="5" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,336,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="4" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,395,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="3" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,453,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="2" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,513,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="1" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,572,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="A" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="276,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="B" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="335,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="C" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="394,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="D" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="453,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="E" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="512,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="F" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="571,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="G" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="630,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label Content="H" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="689,633,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
-        <Label x:Name="MessageLabel" Content="Message Box" HorizontalContentAlignment="Center" FontSize="18" Foreground="White" HorizontalAlignment="Left" Margin="24,376,0,0" VerticalAlignment="Top"/>
-
-        <!--textblocks-->
-        <TextBlock Name="MessageBox" Background="Wheat" Foreground="DarkOliveGreen" Padding="10" TextWrapping="Wrap" Width="180" Height="73" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="24,410,0,0"></TextBlock>
-
-        <!--buttons-->
-        <Button x:Name="ResetBtn" Content="Reset Game" FontSize="18"  Foreground="White" BorderThickness="0" Background="#F85F9E" HorizontalAlignment="Left" Height="50" Margin="24,247,0,0" VerticalAlignment="Top" Width="180"/>
-        <Button x:Name="DefaultSetBtn" Content="Set Default Board" Foreground="White" BorderThickness="0" Background="#F6D02F" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,192,0,0"  VerticalAlignment="Top" Width="180" Click="DefaultSetBtn_Click"/>
-        <Button x:Name="StartBtn" Content="Start the Game" Foreground="White" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,302,0,0" BorderThickness="0" Background="#67D07D" VerticalAlignment="Top" Width="180" Click="StartBtn_Click"/>
-
-        <!--comboboxes-->
-        <ComboBox Name="GameChoiceCombo" HorizontalAlignment="Left" Background="Transparent" Margin="24,152,0,0" VerticalAlignment="Top" Width="180" Height="35"  SelectionChanged="GameChoiceCombo_SelectionChanged" >
-            <ComboBoxItem IsSelected="True">
-                <TextBlock Text="Pick your option" Background="Transparent" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150"  ></TextBlock>
-            </ComboBoxItem>
-            <ComboBoxItem >
-                <TextBlock Text="Default Set" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150" ></TextBlock>
-            </ComboBoxItem>
-            <ComboBoxItem >
-                <TextBlock Text="Play Endgame1" FontSize="18" HorizontalAlignment="Center" ToolTip="Queen and Rook" TextWrapping="Wrap" VerticalAlignment="Center" Width="150" ></TextBlock>
-
-            </ComboBoxItem>
-            <ComboBoxItem >
-                <TextBlock Text="Play Endgame2" FontSize="18" HorizontalAlignment="Center" ToolTip="Queen and 2 Rooks"  TextWrapping="Wrap" VerticalAlignment="Center" Width="150" ></TextBlock>
-            </ComboBoxItem>
-            <ComboBoxItem >
-                <TextBlock Text="Play Knight Moves" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150" ></TextBlock>
-            </ComboBoxItem>
-        </ComboBox>
         </Grid>
-        <!--<Grid x:Name="UppderGrid" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="260,150,0,0" Width="480" Height="480" Background="Red"></Grid>-->
+        <Grid x:Name="MainGrid" >
+
+            <!--images-->
+            <Image Name="SetDefault" Stretch="Fill" Source="/Set.png" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="100" MouseEnter="SetDefault_MouseEnter" MouseLeave="SetDefault_MouseLeave" MouseDown="DefaultSetBtn_Click" Margin="23,163,0,0"/>
+            <Image Name="Reset" Stretch="Fill" Source="/Reset.png" MouseEnter="Reset_MouseEnter" MouseLeave="Reset_MouseLeave" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="100" MouseDown="ResetBtn_Click" Margin="23,286,0,0"/>
+            <Image Name="Start" Stretch="Fill" Source="/Start.png" MouseEnter="Start_MouseEnter" MouseLeave="Start_MouseLeave" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="100" MouseDown="StartBtn_Click" Margin="23,410,0,0"/>
+
+
+            <Image Name="WHolder" Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="268,85,0,0" Height="91" Width="463" />
+            <Image Name="BHolder"   Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="268,720,0,0" Height="91" Width="463" />
+
+            <!--labels-->
+            <Label Content="8" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,210,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="7" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,269,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="6" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,328,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="5" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,387,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="4" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,445,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="3" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,504,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="2" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,564,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="1" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="227,623,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="A" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="276,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="B" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="335,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="C" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="394,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="D" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="453,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="E" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="512,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="F" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="571,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="G" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="630,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+            <Label Content="H" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="689,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
+
+            <!--textblocks-->
+            <TextBlock Name="MessageBox" Background="Transparent" 
+                       Foreground="#EAC43D" Padding="10" 
+                       FontSize="20"
+                       TextWrapping="Wrap" Width="141" 
+                       Height="162" VerticalAlignment="Top" 
+                       HorizontalAlignment="Left" Margin="10,648,0,0"></TextBlock>
+
+
+            <!--selection boxes-->
+            <Menu VerticalAlignment="Top" HorizontalAlignment="Center" Background="#EBEBEB" BorderThickness="0" Width="800" Height="30">
+                <MenuItem Header="Pick Your Game" Width="161" Height="30" BorderThickness="0" FontSize="16">
+                    <MenuItem Name="DefaultGame" Header="Default Game" Click="DefaultGame_Click">
+                        <MenuItem.Icon>
+                            <Image Source="/BP.png" Width="18" Height="18" Stretch="Fill"></Image>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Name="QueenEndgame" Header="Queen Endgame" Click="QueenEndgame_Click">
+                        <MenuItem.Icon>
+                            <Image Source="/BQ.png"  Width="18" Height="18" Stretch="Fill"></Image>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Name="RookEndgame" Header="Rooks Endgame" Click="RookEndgame_Click">
+                        <MenuItem.Icon>
+                            <Image Source="/BR.png" Width="18" Height="18" Stretch="Fill"></Image>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Name="KnightGame" Header="Knight Moves Game" Click="KnightGame_Click">
+                        <MenuItem.Icon>
+                            <Image Source="/BN.png" Width="18" Height="18" Stretch="Fill" ></Image>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+            </Menu>
+            <Image Name="Exit" Source="/Exit.png" Margin="770,0,0,790" MouseEnter="Exit_MouseEnter" MouseLeave="Exit_MouseLeave" MouseDown="Exit_MouseDown"></Image>
+        </Grid>
     </Grid>
 </Window>

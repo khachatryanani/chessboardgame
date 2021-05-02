@@ -7,8 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="BG.png" />
+    <None Remove="BK.png" />
+    <None Remove="BN.png" />
+    <None Remove="BP.png" />
+    <None Remove="BQ.png" />
+    <None Remove="BR.png" />
+    <None Remove="Exit.png" />
     <None Remove="Holder.png" />
     <None Remove="Images\BB.png" />
+    <None Remove="Images\BG.png" />
     <None Remove="Images\BHolder.png" />
     <None Remove="Images\BK.png" />
     <None Remove="Images\BN.png" />
@@ -16,8 +24,16 @@
     <None Remove="Images\BQ.png" />
     <None Remove="Images\BR.png" />
     <None Remove="Images\chesslogo.ico" />
-    <None Remove="Images\Holder.png" />
+    <None Remove="Images\Exit.png" />
+    <None Remove="Images\ExitSelected.png" />
+    <None Remove="Images\holder.png" />
     <None Remove="Images\phantom.png" />
+    <None Remove="Images\Reset.png" />
+    <None Remove="Images\ResetSelected.png" />
+    <None Remove="Images\Set.png" />
+    <None Remove="Images\SetSelected.png" />
+    <None Remove="Images\Start.png" />
+    <None Remove="Images\StartSelected.png" />
     <None Remove="Images\WB.png" />
     <None Remove="Images\WHolder.png" />
     <None Remove="Images\WK.png" />
@@ -26,6 +42,10 @@
     <None Remove="Images\WQ.png" />
     <None Remove="Images\WR.png" />
     <None Remove="Pattern.png" />
+    <None Remove="Reset.png" />
+    <None Remove="Set.png" />
+    <None Remove="SetDefault.png" />
+    <None Remove="Start.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,7 +53,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="BG.png" />
+    <Resource Include="BK.png" />
+    <Resource Include="BN.png" />
+    <Resource Include="BP.png" />
+    <Resource Include="BQ.png" />
+    <Resource Include="BR.png" />
+    <Resource Include="Exit.png" />
     <Resource Include="Images\BB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\BG.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\BK.png">
@@ -54,7 +84,34 @@
     <Resource Include="Images\chesslogo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\Exit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\ExitSelected.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\holder.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\phantom.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Reset.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\ResetSelected.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Set.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\SetSelected.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Start.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\StartSelected.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\WB.png">
@@ -81,6 +138,10 @@
     <Resource Include="Pattern.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Reset.png" />
+    <Resource Include="Set.png" />
+    <Resource Include="SetDefault.png" />
+    <Resource Include="Start.png" />
   </ItemGroup>
 
 </Project>

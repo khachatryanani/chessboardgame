@@ -98,24 +98,16 @@ namespace ChessBoard
         /// <returns>True is it is possible to move the given figure to the given cell, False if not</returns>
         public static bool IsPossibleToMove(Figure figure, Cell cellToMove)
         {
-
-            if (figure is Pawn) 
-            {
-
-                if (GetFigureByCell(cellToMove) != null) 
-                {
-                    return true;
-                }
-                return false;
-               
-            }
-
             if (GetFigureByCell(cellToMove) != null && GetFigureByCell(cellToMove).Color == figure.Color)
             {
                 return false;
             }
 
-           
+            if (figure is Pawn)
+            {
+                return GetFigureByCell(cellToMove) != null;
+            }
+
             char letterMoveFrom = figure.CurrentCell.Letter;
             char letterMoveTo = cellToMove.Letter;
 
@@ -246,66 +238,6 @@ namespace ChessBoard
                             }
                         }
                 }
-                ////Case1: up-right
-                //if (numberMoveFrom > numberMoveTo && letterMoveFrom > letterMoveTo)
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom - 1; i > numberMoveTo && j > letterMoveTo; i--, j--)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
-                ////Case2: up-left
-                //else if (numberMoveFrom > numberMoveTo && letterMoveFrom < letterMoveTo)
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom + 1; i > numberMoveTo && j < letterMoveTo; i--, j++)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
-                ////Case3: down-right
-                //else if (numberMoveFrom < numberMoveTo && letterMoveFrom > letterMoveTo)
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom - 1; i < numberMoveTo && j > letterMoveTo; i++, j--)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
-                ////Case4: down-left
-                //else
-                //{
-                //    Cell cell;
-                //    // Checks if the path from cell to move from to cell to move to is completle free
-                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom + 1; i < numberMoveTo && j < letterMoveTo; i++, j++)
-                //    {
-                //        cell = new Cell((char)j, i);
-                //        if (!IsFreeCell(cell))
-                //        {
-                //            return false;
-                //        }
-                //    }
-                //    return true;
-                //}
             }
         }
 
@@ -387,20 +319,9 @@ namespace ChessBoard
         public static bool IsPossibleMoveForCurrentPosition(Figure figureToMove, Cell cellTo)
         {
 
-            return IsPossibleToMove(figureToMove, cellTo)&&
-
-                   IsCheckDefenseCell(figureToMove, cellTo)&&
+            return IsPossibleToMove(figureToMove, cellTo) &&
+                   IsCheckDefenseCell(figureToMove, cellTo) &&
                    IsNotOpeningCheck(figureToMove, cellTo);
-        }
-
-        public static bool IsPawnInfuelncedFigureCell(Figure figureToMove, Cell cellTo) 
-        {
-            if (figureToMove is Pawn) 
-            {
-                return GetFigureByCell(cellTo) != null;
-            }
-
-            return true;
         }
 
         public static bool IsShortCastelingPossible(Color turn, out Cell castelingKingCell)
@@ -419,7 +340,7 @@ namespace ChessBoard
                     }
                 }
             }
-            else 
+            else
             {
                 if (_board["F8"] == null && _board["G8"] == null)
                 {
@@ -473,10 +394,8 @@ namespace ChessBoard
             return false;
         }
 
-
         public static bool IsCheckDefenseCell(Figure figureToMove, Cell cellTo)
         {
-           
             if (figureToMove is King)
             {
                 return true;
@@ -506,33 +425,33 @@ namespace ChessBoard
             var kingCell = king.CurrentCell;
             var figureCell = influencingFigure.CurrentCell;
 
-            Cell newCell = new Cell(figureCell.ToString());
+            Cell defenseCell = new Cell(figureCell.ToString());
             if (kingCell.Letter > figureCell.Letter)
             {
                 if (kingCell.Number > figureCell.Number)
                 {
-                    
-                    while (newCell != kingCell)
+
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell((char)(newCell.Letter + 1), newCell.Number + 1);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell((char)(defenseCell.Letter + 1), defenseCell.Number + 1);
+                        checkDefenseCells.Add(defenseCell);
                     }
                 }
                 else if (kingCell.Number < figureCell.Number)
                 {
 
-                    while (newCell != kingCell)
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell((char)(newCell.Letter + 1), newCell.Number - 1);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell((char)(defenseCell.Letter + 1), defenseCell.Number - 1);
+                        checkDefenseCells.Add(defenseCell);
                     }
                 }
                 else
                 {
-                    while (newCell != kingCell)
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell((char)(newCell.Letter + 1), newCell.Number);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell((char)(defenseCell.Letter + 1), defenseCell.Number);
+                        checkDefenseCells.Add(defenseCell);
 
                     }
                 }
@@ -541,26 +460,26 @@ namespace ChessBoard
             {
                 if (kingCell.Number > figureCell.Number)
                 {
-                    while (newCell != kingCell)
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell((char)(newCell.Letter - 1), newCell.Number + 1);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell((char)(defenseCell.Letter - 1), defenseCell.Number + 1);
+                        checkDefenseCells.Add(defenseCell);
                     }
                 }
                 else if (kingCell.Number < figureCell.Number)
                 {
-                    while (newCell != kingCell)
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell((char)(newCell.Letter - 1), newCell.Number - 1);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell((char)(defenseCell.Letter - 1), defenseCell.Number - 1);
+                        checkDefenseCells.Add(defenseCell);
                     }
                 }
                 else
                 {
-                    while (newCell != kingCell)
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell((char)(newCell.Letter - 1), newCell.Number);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell((char)(defenseCell.Letter - 1), defenseCell.Number);
+                        checkDefenseCells.Add(defenseCell);
                     }
                 }
             }
@@ -568,18 +487,18 @@ namespace ChessBoard
             {
                 if (kingCell.Number > figureCell.Number)
                 {
-                    while (newCell != kingCell)
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell(newCell.Letter, newCell.Number + 1);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell(defenseCell.Letter, defenseCell.Number + 1);
+                        checkDefenseCells.Add(defenseCell);
                     }
                 }
                 else if (kingCell.Number < figureCell.Number)
                 {
-                    while (newCell != kingCell)
+                    while (defenseCell != kingCell)
                     {
-                        newCell = new Cell(newCell.Letter, newCell.Number - 1);
-                        checkDefenseCells.Add(newCell);
+                        defenseCell = new Cell(defenseCell.Letter, defenseCell.Number - 1);
+                        checkDefenseCells.Add(defenseCell);
                     }
                 }
             }
@@ -589,22 +508,20 @@ namespace ChessBoard
 
         private static bool IsNotOpeningCheck(Figure figureToMove, Cell cellTo)
         {
-            
             var currentCell = figureToMove.CurrentCell;
-
             var stadingFigure = _board[cellTo.ToString()];
-            
+
             figureToMove.PhantomMove(cellTo);
             UpdateBoard(currentCell, cellTo);
-            
+
             bool IsNotOpeningCheck = !IsCheck(figureToMove.Color);
+
             figureToMove.PhantomMove(currentCell);
             UpdateBoard(cellTo, currentCell);
-            if (stadingFigure != null) 
+            if (stadingFigure != null)
             {
                 _board[cellTo.ToString()] = stadingFigure;
             }
-            
 
             return IsNotOpeningCheck;
         }
