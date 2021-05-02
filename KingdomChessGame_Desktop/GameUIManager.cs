@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ChessEngineLogic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace KingdomChessGame_Desktop
 {
@@ -66,8 +67,9 @@ namespace KingdomChessGame_Desktop
             GridBoard = new List<Grid>();
 
             // To be changed into a dynamic choice
-            _engine = new ChessEngine("Black");
+            _engine = new ChessEngine("White");
             _engine.FigureMoved += FigureMove;
+            _engine.GameStatusChanged += UpdateMessageText;
 
         }
 
@@ -99,6 +101,13 @@ namespace KingdomChessGame_Desktop
         /// <param name="gridToMoveTo">Grid that Image objects moves to.</param>
         public void InsertImage(Image imageToMove, Grid gridToMoveTo)
         {
+            var imageInGrid = GetImageByPosition(gridToMoveTo.Name);
+            if (imageInGrid != null) 
+            {
+                var margins = GetImageDefaultMargins(imageInGrid.Name);
+                imageInGrid.Margin = new Thickness(margins.Item1, margins.Item2, 0, 0);
+                imageInGrid.Tag = null;
+            }
             imageToMove.Margin = new Thickness(gridToMoveTo.Margin.Left, gridToMoveTo.Margin.Top, 0, 0);
             imageToMove.Tag = gridToMoveTo.Name;
         }
@@ -108,11 +117,11 @@ namespace KingdomChessGame_Desktop
         /// </summary>
         /// <param name="figureName">Name of the figure which image should be found.</param>
         /// <returns>Image object of the relevant figure.</returns>
-        private Image GetImageByFigureName(string figureName)
+        private Image GetImageByFigureName(string figureName, string cellString)
         {
             foreach (var image in FigureImages)
             {
-                if (image.Name == figureName)
+                if (image.Name == figureName && (string)image.Tag==cellString)
                 {
                     return image;
                 }
@@ -128,15 +137,19 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">GameEvent arguments</param>
         private void FigureMove(object sender, GameEventArgs e)
         {
-            double top = GetGridByName(e.CellTo).Margin.Top;
-            double left = GetGridByName(e.CellTo).Margin.Left;
+            if (e.MovedFigure != null) 
+            {
+                double top = GetGridByName(e.CellTo).Margin.Top;
+                double left = GetGridByName(e.CellTo).Margin.Left;
 
-            Image image = GetImageByFigureName(e.MovedFigure);
+                Image image = GetImageByFigureName(e.MovedFigure, e.CellFrom);
 
-            image.Margin = new Thickness(left, top, 0, 0);
-            image.Tag = e.CellTo;
+                image.Margin = new Thickness(left, top, 0, 0);
+                image.Tag = e.CellTo;
+
+                this.MessageText = GetMessageTextForDefaultGame(e.GameStatus, e.CurrentPlayer, e.WinnerPlayer);
+            }
             
-            this.MessageText = GetMessageTextForDefaultGame(e.GameStatus, e.CurrentPlayer, e.WinnerPlayer);
         }
 
         /// <summary>
@@ -199,6 +212,10 @@ namespace KingdomChessGame_Desktop
         /// <param name="cellName">Current grid name that the figure stands on.</param>
         public void AddHelpers(string cellName)
         {
+            if (string.IsNullOrEmpty(cellName)) 
+            {
+                return;
+            }
             var possibleMoves = _engine.GetPossibleMoves(cellName);
 
             foreach (var cell in possibleMoves)
@@ -268,6 +285,9 @@ namespace KingdomChessGame_Desktop
                     _engine.PlayUser(cellFrom, cellTo);
                     _engine.PlayWinningWithQueenAndTwoRooksAlgorithm();
                     break;
+                case 1:
+                    _engine.PlayUser(cellFrom, cellTo);
+                    break;
             }
         }
 
@@ -336,7 +356,7 @@ namespace KingdomChessGame_Desktop
                 }
                 marginTop += 59;
             }
-
+           
             return GridBoard;
         }
 
@@ -437,7 +457,7 @@ namespace KingdomChessGame_Desktop
         public void CreateFigure(string cellString, string typeString, string colorString)
         {
             _engine.CreateFigure(cellString, typeString, colorString);
-            this.MessageText = GetMessageTextForDefaultGame(0, "Black", string.Empty);
+            this.MessageText = GetMessageTextForDefaultGame(0, "White", string.Empty);
         }
 
         /// <summary>
@@ -451,14 +471,11 @@ namespace KingdomChessGame_Desktop
             {
                 await Task.Run(() =>
                 {
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        image.Margin = new Thickness(grid.Margin.Left, grid.Margin.Top, 0, 0);
-                        image.Tag = grid.Name;
-                        grid.Tag = image;
-                    }));
                     Task.Delay(1000).Wait();
                 });
+
+                image.Margin = new Thickness(grid.Margin.Left, grid.Margin.Top, 0, 0);
+                image.Tag = grid.Name;
             }
         }
 
@@ -537,15 +554,15 @@ namespace KingdomChessGame_Desktop
         /// <returns>Grid if it is empty, Null if the grid was not found or was not empty</returns>
         private Grid GetEmtpyGridByName(string name)
         {
-            foreach (var grid in GridBoard)
-            {
-                if (grid.Name == name && IsEmptyGrid(grid))
-                {
-                    return grid;
-                }
-            }
+            //foreach (var grid in GridBoard)
+            //{
+            //    if (grid.Name == name && IsEmptyGrid(grid))
+            //    {
+            //        return grid;
+            //    }
+            //}
 
-            return null;
+            return GridBoard.FirstOrDefault(grid => grid.Name == name && IsEmptyGrid(grid));
         }
 
         /// <summary>
@@ -565,6 +582,42 @@ namespace KingdomChessGame_Desktop
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets the image object based on the chess board cell its figure is standing one.
+        /// </summary>
+        /// <param name="gridName">Grid Name as a chess board cell name</param>
+        /// <returns>Image object of the figure standing on the given chess cell position.</returns>
+        private Image GetImageByPosition(string gridName) 
+        {
+            return this.FigureImages.FirstOrDefault(image => (string)image.Tag == gridName);   
+        }
+
+        /// <summary>
+        /// Updates the message text property accoridng the game status after each move.
+        /// </summary>
+        /// <param name="sender">Chess Engine</param>
+        /// <param name="e">GameEventsArgs argument.</param>
+        private void UpdateMessageText(object sender, GameEventArgs e) 
+        {
+            switch (e.GameStatus) 
+            {
+                case 0:
+                    MessageText = $"{e.CurrentPlayer}'s turn to play.";
+                    break;
+                case 1:
+                    MessageText = $"{e.CurrentPlayer}'s king is under check.";
+                    break;
+                case 2:
+                    string winner = e.CurrentPlayer == "White" ? "Blacks" : "Whites";
+                    MessageText = $"Mate! {winner} win.";
+                    break;
+                case 3:
+                    MessageText = $"It's a stalemate...";
+                    break;
+
+            }
         }
     }
 }

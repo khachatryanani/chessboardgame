@@ -20,7 +20,6 @@ namespace ChessBoard.Figures
             int letter = this.CurrentCell.Letter;
             int number = this.CurrentCell.Number;
             List<Cell> cells = new List<Cell>();
-            cells.Add(this.CurrentCell);
             for (int i = letter - 2; i <= letter + 2; i++)
             {
                 if (i == letter) 

@@ -2,6 +2,7 @@
 using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
 using ChessBoard.Extensions;
+using System.Collections.Generic;
 
 namespace ChessBoard
 {
@@ -48,24 +49,26 @@ namespace ChessBoard
         /// <param name="cellToMove">Cell to verify for Chess Check</param>
         /// <param name="colorOfPlayer">Color of current player</param>
         /// <returns>True if the given cell falls under Check of opposite figures, False if it does not</returns>
-        public static bool IsUnderCheckCell(Cell cellToMove, Color colorOfPlayer)
+        public static bool IsUnderCheckCell(Cell cellToMove, Color colorOfPlayer, out Figure influencingFigure)
         {
             foreach (var item in _board)
             {
-                if (item.InfluencedCells.ContainsCell(cellToMove) && item.Color != colorOfPlayer)
+                if (item.InfluencedCells.ContainsCell(cellToMove) && item.Color != colorOfPlayer && IsPossibleToMove(item, cellToMove))
                 {
                     King king = GetTheKing(colorOfPlayer);
                     Cell kingCell = king.CurrentCell;
                     Cell placeHolder = new Cell();
-                    king.Move(placeHolder);
+                    king.PhantomMove(placeHolder);
                     if (IsPossibleToMove(item, cellToMove))
                     {
-                        king.Move(kingCell);
+                        king.PhantomMove(kingCell);
+                        influencingFigure = item;
                         return true;
                     }
-                    king.Move(kingCell);
+                    king.PhantomMove(kingCell);
                 }
             }
+            influencingFigure = null;
             return false;
         }
 
@@ -95,11 +98,24 @@ namespace ChessBoard
         /// <returns>True is it is possible to move the given figure to the given cell, False if not</returns>
         public static bool IsPossibleToMove(Figure figure, Cell cellToMove)
         {
-            if (!figure.InfluencedCells.ContainsCell(cellToMove))
+
+            if (figure is Pawn) 
+            {
+
+                if (GetFigureByCell(cellToMove) != null) 
+                {
+                    return true;
+                }
+                return false;
+               
+            }
+
+            if (GetFigureByCell(cellToMove) != null && GetFigureByCell(cellToMove).Color == figure.Color)
             {
                 return false;
             }
 
+           
             char letterMoveFrom = figure.CurrentCell.Letter;
             char letterMoveTo = cellToMove.Letter;
 
@@ -230,6 +246,66 @@ namespace ChessBoard
                             }
                         }
                 }
+                ////Case1: up-right
+                //if (numberMoveFrom > numberMoveTo && letterMoveFrom > letterMoveTo)
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom - 1; i > numberMoveTo && j > letterMoveTo; i--, j--)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
+                ////Case2: up-left
+                //else if (numberMoveFrom > numberMoveTo && letterMoveFrom < letterMoveTo)
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom - 1, j = letterMoveFrom + 1; i > numberMoveTo && j < letterMoveTo; i--, j++)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
+                ////Case3: down-right
+                //else if (numberMoveFrom < numberMoveTo && letterMoveFrom > letterMoveTo)
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom - 1; i < numberMoveTo && j > letterMoveTo; i++, j--)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
+                ////Case4: down-left
+                //else
+                //{
+                //    Cell cell;
+                //    // Checks if the path from cell to move from to cell to move to is completle free
+                //    for (int i = numberMoveFrom + 1, j = letterMoveFrom + 1; i < numberMoveTo && j < letterMoveTo; i++, j++)
+                //    {
+                //        cell = new Cell((char)j, i);
+                //        if (!IsFreeCell(cell))
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //    return true;
+                //}
             }
         }
 
@@ -294,16 +370,6 @@ namespace ChessBoard
         }
 
         /// <summary>
-        /// Checks if the gicen Cell is within the board limits
-        /// </summary>
-        /// <param name="cell">Cell object to check</param>
-        /// <returns>True is the cell is within the board limit, False if it is not.</returns>
-        public static bool IsValidCell(Cell cell) 
-        {
-            return cell.Letter <= 72 && cell.Letter >= 65 && cell.Number <= 8 && cell.Number >= 1;
-        }
-
-        /// <summary>
         /// When a Move occures, updates the board with the new positions
         /// </summary>
         /// <param name="movedFrom">Cell the figure of which was moved</param>
@@ -316,6 +382,238 @@ namespace ChessBoard
             Figure temp = _board[oldCell];
             _board.Remove(oldCell);
             _board[newCell] = temp;
+        }
+
+        public static bool IsPossibleMoveForCurrentPosition(Figure figureToMove, Cell cellTo)
+        {
+
+            return IsPossibleToMove(figureToMove, cellTo)&&
+
+                   IsCheckDefenseCell(figureToMove, cellTo)&&
+                   IsNotOpeningCheck(figureToMove, cellTo);
+        }
+
+        public static bool IsPawnInfuelncedFigureCell(Figure figureToMove, Cell cellTo) 
+        {
+            if (figureToMove is Pawn) 
+            {
+                return GetFigureByCell(cellTo) != null;
+            }
+
+            return true;
+        }
+
+        public static bool IsShortCastelingPossible(Color turn, out Cell castelingKingCell)
+        {
+            if (turn == Color.White)
+            {
+                if (_board["F1"] == null && _board["G1"] == null)
+                {
+                    var king = GetTheKing(turn);
+                    var rook = GetFigureByCell(new Cell("H1"));
+
+                    if (!king.HasMoved && !rook.HasMoved)
+                    {
+                        castelingKingCell = new Cell("G1");
+                        return true;
+                    }
+                }
+            }
+            else 
+            {
+                if (_board["F8"] == null && _board["G8"] == null)
+                {
+                    var king = GetTheKing(turn);
+                    var rook = GetFigureByCell(new Cell("H8"));
+
+                    if (!king.HasMoved && !rook.HasMoved)
+                    {
+                        castelingKingCell = new Cell("G8");
+                        return true;
+                    }
+                }
+            }
+
+            castelingKingCell = null;
+            return false;
+        }
+
+        public static bool IsLongCastelingPossible(Color turn, out Cell castelingKingCell)
+        {
+            if (turn == Color.White)
+            {
+                if (_board["B1"] == null && _board["C1"] == null && _board["D1"] == null)
+                {
+                    var king = GetTheKing(turn);
+                    var rook = GetFigureByCell(new Cell("A1"));
+
+                    if (!king.HasMoved && !rook.HasMoved)
+                    {
+                        castelingKingCell = new Cell("C1");
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (_board["B8"] == null && _board["C8"] == null && _board["D8"] == null)
+                {
+                    var king = GetTheKing(turn);
+                    var rook = GetFigureByCell(new Cell("A8"));
+
+                    if (!king.HasMoved && !rook.HasMoved)
+                    {
+                        castelingKingCell = new Cell("C8");
+                        return true;
+                    }
+                }
+            }
+
+            castelingKingCell = null;
+            return false;
+        }
+
+
+        public static bool IsCheckDefenseCell(Figure figureToMove, Cell cellTo)
+        {
+           
+            if (figureToMove is King)
+            {
+                return true;
+            }
+
+            var king = GetTheKing(figureToMove.Color);
+
+            // Check if it is on cell under influence
+            if (IsUnderCheckCell(king.CurrentCell, king.Color, out Figure influencingFigure))
+            {
+                var checkDefenseCells = GetCheckDefenseCells(king, influencingFigure);
+                return checkDefenseCells.Contains(cellTo);
+            }
+
+            return true;
+        }
+
+        public static List<Cell> GetCheckDefenseCells(King king, Figure influencingFigure)
+        {
+            var checkDefenseCells = new List<Cell>();
+            checkDefenseCells.Add(influencingFigure.CurrentCell);
+            if (influencingFigure is Pawn || influencingFigure is Knight)
+            {
+                return checkDefenseCells;
+            }
+
+            var kingCell = king.CurrentCell;
+            var figureCell = influencingFigure.CurrentCell;
+
+            Cell newCell = new Cell(figureCell.ToString());
+            if (kingCell.Letter > figureCell.Letter)
+            {
+                if (kingCell.Number > figureCell.Number)
+                {
+                    
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell((char)(newCell.Letter + 1), newCell.Number + 1);
+                        checkDefenseCells.Add(newCell);
+                    }
+                }
+                else if (kingCell.Number < figureCell.Number)
+                {
+
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell((char)(newCell.Letter + 1), newCell.Number - 1);
+                        checkDefenseCells.Add(newCell);
+                    }
+                }
+                else
+                {
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell((char)(newCell.Letter + 1), newCell.Number);
+                        checkDefenseCells.Add(newCell);
+
+                    }
+                }
+            }
+            else if (kingCell.Letter < figureCell.Letter)
+            {
+                if (kingCell.Number > figureCell.Number)
+                {
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell((char)(newCell.Letter - 1), newCell.Number + 1);
+                        checkDefenseCells.Add(newCell);
+                    }
+                }
+                else if (kingCell.Number < figureCell.Number)
+                {
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell((char)(newCell.Letter - 1), newCell.Number - 1);
+                        checkDefenseCells.Add(newCell);
+                    }
+                }
+                else
+                {
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell((char)(newCell.Letter - 1), newCell.Number);
+                        checkDefenseCells.Add(newCell);
+                    }
+                }
+            }
+            else
+            {
+                if (kingCell.Number > figureCell.Number)
+                {
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell(newCell.Letter, newCell.Number + 1);
+                        checkDefenseCells.Add(newCell);
+                    }
+                }
+                else if (kingCell.Number < figureCell.Number)
+                {
+                    while (newCell != kingCell)
+                    {
+                        newCell = new Cell(newCell.Letter, newCell.Number - 1);
+                        checkDefenseCells.Add(newCell);
+                    }
+                }
+            }
+
+            return checkDefenseCells;
+        }
+
+        private static bool IsNotOpeningCheck(Figure figureToMove, Cell cellTo)
+        {
+            
+            var currentCell = figureToMove.CurrentCell;
+
+            var stadingFigure = _board[cellTo.ToString()];
+            
+            figureToMove.PhantomMove(cellTo);
+            UpdateBoard(currentCell, cellTo);
+            
+            bool IsNotOpeningCheck = !IsCheck(figureToMove.Color);
+            figureToMove.PhantomMove(currentCell);
+            UpdateBoard(cellTo, currentCell);
+            if (stadingFigure != null) 
+            {
+                _board[cellTo.ToString()] = stadingFigure;
+            }
+            
+
+            return IsNotOpeningCheck;
+        }
+
+        private static bool IsCheck(Color kingColor)
+        {
+            var king = GetTheKing(kingColor);
+
+            return IsUnderCheckCell(king.CurrentCell, king.Color, out Figure influencingFigure);
         }
     }
 }

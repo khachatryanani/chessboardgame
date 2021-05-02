@@ -193,5 +193,10 @@ namespace ChessEngineLogic
 
             return fixedTemplate;
         }
+
+        private bool IsValidCell(Cell cell) 
+        {
+            return cell.Letter <= 72 && cell.Letter >= 65 && cell.Number <= 8 && cell.Number >= 1;
+        }
     }
 }

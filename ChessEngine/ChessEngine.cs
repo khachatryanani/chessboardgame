@@ -3,6 +3,8 @@ using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
 using static ChessBoard.ChessBoardManager;
 using System.Collections.Generic;
+using ChessBoard.Extensions;
+using ChessBoard;
 
 namespace ChessEngineLogic
 {
@@ -18,13 +20,26 @@ namespace ChessEngineLogic
         /// </summary>
         public event EventHandler<GameEventArgs> FigureMoved;
 
-        protected virtual void OnFigureMoved(Figure movedFigure)
+        public event EventHandler<GameEventArgs> GameStatusChanged;
+
+        protected virtual void OnGameStatusChanged()
+        {
+            int status = GetGameStatus();
+
+            GameStatusChanged?.Invoke(this, new GameEventArgs
+            {
+                GameStatus = status,
+                CurrentPlayer = _turn == Color.Black ? "Black" : "White"
+            });
+        }
+
+        protected virtual void OnFigureMoved(Figure movedFigure, Cell cellFrom)
         {
             int status = GetGameStatus();
             string currentPlayer = movedFigure.Color == Color.Black ? "White" : "Black";
             string winner = string.Empty;
 
-            if (status == 2) 
+            if (status == 2)
             {
                 winner = _turn == Color.Black ? "Whites" : "Blacks";
             }
@@ -32,18 +47,19 @@ namespace ChessEngineLogic
             FigureMoved?.Invoke(this, new GameEventArgs
             {
                 MovedFigure = movedFigure.Name,
+                CellFrom = cellFrom.ToString(),
                 CellTo = movedFigure.CurrentCell.ToString(),
                 GameStatus = status,
                 CurrentPlayer = currentPlayer,
                 WinnerPlayer = winner
-            }) ;
+            });
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="playerColor">Color of the first player.</param>
-        public ChessEngine(string playerColor) 
+        public ChessEngine(string playerColor)
         {
             _turn = playerColor == "Black" ? Color.Black : Color.White;
         }
@@ -54,7 +70,7 @@ namespace ChessEngineLogic
         /// <param name="choice">Game choice</param>
         public void PlayEngine(int choice)
         {
-            switch (choice) 
+            switch (choice)
             {
                 case 2:
                     PlayWinningWithQueenAndRookAlgorithm();
@@ -73,14 +89,14 @@ namespace ChessEngineLogic
         private void UpdatePosition(Figure figure, Cell cellFrom, Cell cellTo)
         {
             UpdateBoard(cellFrom, cellTo);
-            OnFigureMoved(figure);
+            OnFigureMoved(figure, cellFrom);
         }
 
         /// <summary>
         /// Returns the current game status: 0 = usual, 1 = check, 2 = mate, 3 = stalemate
         /// </summary>
         /// <returns>Game status in integer representation</returns>
-        private int GetGameStatus() 
+        private int GetGameStatus()
         {
             if (IsMate())
             {
@@ -90,7 +106,7 @@ namespace ChessEngineLogic
             {
                 return 3;
             }
-            else if (IsCheck()) 
+            else if (IsCheck())
             {
                 return 1;
             }
@@ -105,29 +121,44 @@ namespace ChessEngineLogic
         /// <returns>List of cells names that are possible to move to.</returns>
         public List<string> GetPossibleMoves(string cellString)
         {
+            List<string> possibleMoves = new List<string>();
             Cell currentCell = new Cell(cellString);
             Figure figure = GetFigureByCell(currentCell);
 
-            List<string> possibleCells = new List<string>();
-            foreach (var cell in figure.InfluencedCells)
+            if (figure is King)
             {
-                if (IsPossibleToMove(figure, cell) && figure.CurrentCell != cell)
+                if (IsShortCastelingPossible(figure.Color, out Cell cellToMoveS)) 
                 {
-                    if ((figure is King))
+                    possibleMoves.Add(cellToMoveS.ToString());
+                }
+
+                if (IsLongCastelingPossible(figure.Color, out Cell cellToMoveL))
+                {
+                    possibleMoves.Add(cellToMoveL.ToString());
+                }
+            }
+
+            if (figure is Pawn)
+            {
+                foreach (var pawnCell in (figure as Pawn).MovementCells)
+                {
+                    if (figure.CurrentCell != pawnCell && IsFreeCell(pawnCell))
                     {
-                        if (!IsUnderCheckCell(cell, figure.Color))
-                        {
-                            possibleCells.Add(cell.ToString());
-                        }
-                    }
-                    else
-                    {
-                        possibleCells.Add(cell.ToString());
+                        possibleMoves.Add(pawnCell.ToString());
                     }
                 }
             }
 
-            return possibleCells;
+
+            foreach (var cell in figure.InfluencedCells)
+            {
+                if (IsPossibleMoveForCurrentPosition(figure, cell) && figure.CurrentCell != cell)
+                {
+                    possibleMoves.Add(cell.ToString());
+                }
+            }
+
+            return possibleMoves;
         }
 
         /// <summary>
@@ -160,7 +191,10 @@ namespace ChessEngineLogic
             {
                 "Q" => typeof(Queen),
                 "R" => typeof(Rook),
-                _ => typeof(King),
+                "K" => typeof(King),
+                "N" => typeof(Knight),
+                "B" => typeof(Bishop),
+                _ => typeof(Pawn),
             };
         }
 
@@ -179,14 +213,69 @@ namespace ChessEngineLogic
         /// </summary>
         /// <param name="cellFrom">Cell from which user moved.</param>
         /// <param name="cellTo">Cell to which user moved.</param>
-        public void PlayUser(string cellFrom, string cellTo) 
+        public void PlayUser(string cellFrom, string cellTo)
         {
             Figure figure = GetFigureByCell(new Cell(cellFrom));
             figure.Move(new Cell(cellTo));
-            
-            UpdateBoard(new Cell(cellFrom), new Cell(cellTo));
 
+            UpdateBoard(new Cell(cellFrom), new Cell(cellTo));
+            if (figure is King) 
+            {
+                DoCasteling(figure);
+            }
             this._turn = this._turn == Color.Black ? Color.White : Color.Black;
+            OnGameStatusChanged();
+        }
+
+        public void DoCasteling(Figure king) 
+        {
+            if (king.Color == Color.Black)
+            {
+                if (king.CurrentCell.ToString() == "G8")
+                {
+                    var rook = GetFigureByCell(new Cell("H8"));
+                    var cellFrom = rook.CurrentCell;
+                    var cellTo = new Cell("F8");
+                    rook.Move(cellTo);
+                    UpdateBoard(cellFrom, cellTo);
+                    OnFigureMoved(rook, cellFrom);
+                }
+
+                if (king.CurrentCell.ToString() == "C8")
+                {
+                    var rook = GetFigureByCell(new Cell("A8"));
+                    var cellFrom = rook.CurrentCell;
+
+                    var cellTo = new Cell("D8");
+                    rook.Move(cellTo);
+                    UpdateBoard(cellFrom, cellTo);
+                    OnFigureMoved(rook, cellFrom);
+                }
+            }
+            else 
+            {
+                if (king.CurrentCell.ToString() == "G1")
+                {
+                    var rook = GetFigureByCell(new Cell("H1"));
+                    var cellFrom = rook.CurrentCell;
+
+                    var cellTo = new Cell("F1");
+                    rook.Move(cellTo);
+                    UpdateBoard(cellFrom, cellTo);
+                    OnFigureMoved(rook, cellFrom);
+                }
+
+                if (king.CurrentCell.ToString() == "C1")
+                {
+                    var rook = GetFigureByCell(new Cell("A1"));
+                    var cellFrom = rook.CurrentCell;
+
+                    var cellTo = new Cell("D1");
+                    rook.Move(cellTo);
+                    UpdateBoard(cellFrom, cellTo);
+                    OnFigureMoved(rook, cellFrom);
+                }
+            }
         }
 
         // Move to ChessBoard as a seperate class that checks
@@ -201,13 +290,7 @@ namespace ChessEngineLogic
             King king = GetTheKing(_turn);
 
             // Check if it is on cell under influence
-            if (IsUnderCheckCell(king.CurrentCell, king.Color))
-            {
-
-                return true;
-            }
-
-            return false;
+            return IsUnderCheckCell(king.CurrentCell, king.Color, out Figure influencingFigure);
         }
 
         /// Checks if it is a Mate situation in the game:
@@ -217,7 +300,7 @@ namespace ChessEngineLogic
         private bool IsMate()
         {
             King king = GetTheKing(_turn);
-            if (IsCheck()) 
+            if (IsCheck())
             {
                 foreach (var item in king.InfluencedCells)
                 {
@@ -245,7 +328,7 @@ namespace ChessEngineLogic
             {
                 foreach (var item in king.InfluencedCells)
                 {
-                    if (!IsUnderCheckCell(item, king.Color) && item != king.CurrentCell)
+                    if (!IsUnderCheckCell(item, king.Color, out Figure influencingFigure) && item != king.CurrentCell)
                     {
                         return false;
                     }

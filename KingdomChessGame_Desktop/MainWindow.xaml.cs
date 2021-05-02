@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace KingdomChessGame_Desktop
 {
@@ -15,9 +16,17 @@ namespace KingdomChessGame_Desktop
         /// </summary>
         private readonly GameUIManager _manager;
 
+        private Image MovingImage { get; set; }
+
+        private bool PlayingWithWhites { get; set; }
+
+        private Grid UppderGrid { get; set; }
+
         public MainWindow()
         {
             _manager = new GameUIManager();
+
+            PlayingWithWhites = true;
 
             InitializeComponent();
             InitializeBoard();
@@ -36,6 +45,7 @@ namespace KingdomChessGame_Desktop
             var figureImages = _manager.CreateFigureImages();
             foreach (var figureImage in figureImages)
             {
+                figureImage.MouseDown += Placement_MouseDown;
                 figureImage.MouseMove += Figure_MouseMove;
                 figureImage.MouseUp += Placement_MouseUp;
                 if (!MainGrid.Children.Contains(figureImage))
@@ -56,6 +66,7 @@ namespace KingdomChessGame_Desktop
             {
                 MainGrid.Children.Add(grid);
             }
+
         }
 
         /// <summary>
@@ -75,7 +86,6 @@ namespace KingdomChessGame_Desktop
                 "BP", "WP", "BP","WP","BP","WP","BP","WP", "BP", "WP","BP","WP","BP","WP","BP","WP" };
                     break;
                 case 2:
-
                     _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR" };
                     break;
                 case 3:
@@ -103,20 +113,22 @@ namespace KingdomChessGame_Desktop
             double top = position.Y;
 
             Image image = sender as Image;
-            image.Width = 60;
-            image.Height = 60;
+            MovingImage.Width = 60;
+            MovingImage.Height = 60;
+           
 
             foreach (var grid in _manager.GridBoard)
             {
                 if (grid.Margin.Top <= top && grid.Margin.Left <= left &&
                     grid.Margin.Top + grid.Height >= top && grid.Margin.Left + grid.Width >= left)
                 {
-                    _manager.InsertImage(image, grid);
+                    _manager.InsertImage(MovingImage, grid);
                     return;
                 }
             }
 
-            _manager.ResetImage(image);
+            _manager.ResetImage(MovingImage);
+            MovingImage = null;
         }
 
         /// <summary>
@@ -126,17 +138,20 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">MouseEventArgs argument</param>
         private void Figure_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (MovingImage != null) 
             {
-                var position = e.GetPosition(this);
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    var position = e.GetPosition(this);
 
-                double left = position.X;
-                double top = position.Y;
+                    double left = position.X;
+                    double top = position.Y;
 
-                Image image = sender as Image;
-                image.Width = 80;
-                image.Height = 80;
-                image.Margin = new Thickness(left - image.Width / 2, top - image.Height / 2, 0, 0);
+                    //Image image = sender as Image;
+                    MovingImage.Width = 80;
+                    MovingImage.Height = 80;
+                    MovingImage.Margin = new Thickness(left - MovingImage.Width / 2, top - MovingImage.Height / 2, 0, 0);
+                }
             }
         }
 
@@ -147,16 +162,23 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">MouseButtonEventArgs argument</param>
         private void Figure_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (MovingImage == null) 
+            {
+                return;
+            }
+
             var position = e.GetPosition(this);
 
             double left = position.X;
             double top = position.Y;
 
-            Image image = sender as Image;
-            image.Width = 60;
-            image.Height = 60;
+            int iZIndex = Canvas.GetZIndex(MovingImage);
+            Canvas.SetZIndex(MovingImage, iZIndex - 1);
 
-            string cellFrom = (string)image.Tag;
+            MovingImage.Width = 60;
+            MovingImage.Height = 60;
+            
+            string cellFrom = (string)MovingImage.Tag;
 
             _manager.RemoveHelpers(cellFrom);
 
@@ -169,14 +191,21 @@ namespace KingdomChessGame_Desktop
                     if (_manager.IsValidCellToMove(cellFrom, cellTo))
                     {
                         _manager.Play(cellFrom, cellTo);
-                        _manager.InsertImage(image, grid);
+                        _manager.InsertImage(MovingImage, grid);
+
+                        PlayingWithWhites = !PlayingWithWhites;
+                        LetPlayerMoveImages(PlayingWithWhites);
+                       
+                        MovingImage = null;
+
                         MessageBox.Text = _manager.MessageText;
                         return;
                     }
                 }
             }
             var startGrid = _manager.GetGridByName(cellFrom);
-            _manager.InsertImage(image, startGrid);
+            _manager.InsertImage(MovingImage, startGrid);
+            MovingImage = null;
         }
 
         /// <summary>
@@ -186,8 +215,28 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">MouseButtonEventArgs argument</param>
         private void Figure_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Image image = sender as Image;
-            _manager.AddHelpers((string)image?.Tag);
+            if ((sender as Image)?.Tag == null) 
+            {
+                return;
+            }
+           
+            MovingImage = sender as Image;
+            int iZIndex = Canvas.GetZIndex(MovingImage);
+            Canvas.SetZIndex(MovingImage, iZIndex + 1);
+
+            _manager.AddHelpers((string)MovingImage.Tag);
+        }
+
+        /// <summary>
+        /// Add the helper cells for the image figure.
+        /// </summary>
+        /// <param name="sender">Image object.</param>
+        /// <param name="e">MouseButtonEventArgs argument</param>
+        private void Placement_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            MovingImage = sender as Image;
+            int iZIndex = Canvas.GetZIndex(MovingImage);
+            Canvas.SetZIndex(MovingImage, iZIndex + 1);
         }
 
         /// <summary>
@@ -203,6 +252,16 @@ namespace KingdomChessGame_Desktop
                 switch (choice)
                 {
                     // Play winning algorithms
+                    case 1:
+                        foreach (var image in _manager.FigureImages)
+                        {
+                            image.MouseUp -= Placement_MouseUp;
+                            _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
+                        }
+
+                        LetPlayerMoveImages(PlayingWithWhites);
+                        break;
+
                     case 2:
                     case 3:
                         foreach (var image in _manager.FigureImages)
@@ -254,6 +313,46 @@ namespace KingdomChessGame_Desktop
         private void ResetBtn_Click(object sender, RoutedEventArgs e)
         {
             _manager.ResetGame();
+        }
+
+        private void LetPlayerMoveImages(bool whitesTurn) 
+        {
+            if (whitesTurn)
+            {
+                foreach (var image in _manager.FigureImages)
+                {
+                    if (image.Name[0] == 'W')
+                    {
+                        image.MouseDown += Figure_MouseDown;
+                        image.MouseMove += Figure_MouseMove;
+                        image.MouseUp += Figure_MouseUp;
+                    }
+                    else
+                    {
+                        image.MouseDown -= Figure_MouseDown;
+                        image.MouseMove -= Figure_MouseMove;
+                        image.MouseUp -= Figure_MouseUp;
+                    }
+                }
+            }
+            else 
+            {
+                foreach (var image in _manager.FigureImages)
+                {
+                    if (image.Name[0] == 'B')
+                    {
+                        image.MouseDown += Figure_MouseDown;
+                        image.MouseMove += Figure_MouseMove;
+                        image.MouseUp += Figure_MouseUp;
+                    }
+                    else
+                    {
+                        image.MouseDown -= Figure_MouseDown;
+                        image.MouseMove -= Figure_MouseMove;
+                        image.MouseUp -= Figure_MouseUp;
+                    }
+                }
+            }
         }
     }
 }

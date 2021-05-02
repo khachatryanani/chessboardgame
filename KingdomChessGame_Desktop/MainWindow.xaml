@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:KingdomChessGame_Desktop"
         mc:Ignorable="d"
         Title="Kingdom Chess" Height="820" Width="800" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" >
-    <Grid x:Name="MainGrid">
+    <Grid x:Name="WindowGrid">
+        <Grid x:Name="MainGrid">
+        
         <!--images-->
         <Image x:Name="BG" Source="/Pattern.png" Stretch="Fill" />
         <Image Name="WHolder" Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,19,0,0" Height="96" Width="489" />
@@ -40,9 +42,9 @@
         <Button x:Name="StartBtn" Content="Start the Game" Foreground="White" FontSize="18" HorizontalAlignment="Left" Height="50" Margin="24,302,0,0" BorderThickness="0" Background="#67D07D" VerticalAlignment="Top" Width="180" Click="StartBtn_Click"/>
 
         <!--comboboxes-->
-        <ComboBox Name="GameChoiceCombo" HorizontalAlignment="Left" Margin="24,152,0,0" VerticalAlignment="Top" Width="180" Height="35" Background="Wheat" SelectionChanged="GameChoiceCombo_SelectionChanged" >
+        <ComboBox Name="GameChoiceCombo" HorizontalAlignment="Left" Background="Transparent" Margin="24,152,0,0" VerticalAlignment="Top" Width="180" Height="35"  SelectionChanged="GameChoiceCombo_SelectionChanged" >
             <ComboBoxItem IsSelected="True">
-                <TextBlock Text="Pick your option" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150"  ></TextBlock>
+                <TextBlock Text="Pick your option" Background="Transparent" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150"  ></TextBlock>
             </ComboBoxItem>
             <ComboBoxItem >
                 <TextBlock Text="Default Set" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150" ></TextBlock>
@@ -58,5 +60,7 @@
                 <TextBlock Text="Play Knight Moves" FontSize="18" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="150" ></TextBlock>
             </ComboBoxItem>
         </ComboBox>
+        </Grid>
+        <!--<Grid x:Name="UppderGrid" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="260,150,0,0" Width="480" Height="480" Background="Red"></Grid>-->
     </Grid>
 </Window>
