@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using ChessBoard.BoardAttributes;
+﻿using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
 using static ChessBoard.ChessBoardManager;
+using System;
+using System.Collections.Generic;
 
 namespace ChessEngineLogic
 {
@@ -530,9 +530,10 @@ namespace ChessEngineLogic
 
             foreach (var cellTo in currentInfuencedCells)
             {
-                if (IsPossibleToMove(queen, cellTo) && IsFreeCell(cellTo) &&
-                    ((Math.Abs(cellTo.Number - oppositeKing.CurrentCell.Number) >= 2 && Math.Abs(cellTo.Letter - oppositeKing.CurrentCell.Letter) >= 2)
-                        || IsPossibleToMove(rook, cellTo) || IsPossibleToMove(king, cellTo)))
+                bool isSafeDisstance = Math.Abs(cellTo.Number - oppositeKing.CurrentCell.Number) >= 2 || 
+                                       Math.Abs(cellTo.Letter - oppositeKing.CurrentCell.Letter) >= 2;
+                if ((IsPossibleToMove(queen, cellTo) && IsFreeCell(cellTo) && isSafeDisstance)
+                    || IsPossibleToMove(rook, cellTo) || IsPossibleToMove(king, cellTo))
                 {
                     queen.Move(cellTo);
                     _turn = oppositeColor;

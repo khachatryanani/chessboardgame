@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ChessBoard.BoardAttributes;
+﻿using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
-using ChessBoard.Extensions;
 using static ChessBoard.ChessBoardManager;
+using System;
 
 namespace ChessEngineLogic
 {

@@ -76,5 +76,13 @@
             </Menu>
             <Image Name="Exit" Source="/Exit.png" Margin="770,0,0,790" MouseEnter="Exit_MouseEnter" MouseLeave="Exit_MouseLeave" MouseDown="Exit_MouseDown"></Image>
         </Grid>
+
+        <Grid x:Name="FigureChoice" Visibility="Visible" VerticalAlignment="Top" HorizontalAlignment="Left" Height="134" Margin="300,140,0,0" Width="170">
+            <Image x:Name="Q" Stretch="Fill" Source="/YQ.png" Height="50" Width="50" Margin="34,1,86,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown" />
+            <Image x:Name="N" Stretch="Fill" Source="/YN.png" Height="50" Width="50" Margin="114,51,6,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
+            <Image x:Name="B" Stretch="Fill" Source="/YB.png" Height="50" Width="50" Margin="89,1,31,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
+            <Image x:Name="R" Stretch="Fill" Source="/YR.png" Height="50" Width="50" Margin="9,51,111,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
+
+        </Grid>
     </Grid>
 </Window>

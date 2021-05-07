@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="BB.png" />
     <None Remove="BG.png" />
     <None Remove="BK.png" />
     <None Remove="BN.png" />
@@ -41,11 +42,19 @@
     <None Remove="Images\WP.png" />
     <None Remove="Images\WQ.png" />
     <None Remove="Images\WR.png" />
+    <None Remove="Images\YB.png" />
+    <None Remove="Images\YN.png" />
+    <None Remove="Images\YQ.png" />
+    <None Remove="Images\YR.png" />
     <None Remove="Pattern.png" />
     <None Remove="Reset.png" />
     <None Remove="Set.png" />
     <None Remove="SetDefault.png" />
     <None Remove="Start.png" />
+    <None Remove="YB.png" />
+    <None Remove="YN.png" />
+    <None Remove="YQ.png" />
+    <None Remove="YR.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,6 +62,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="BB.png" />
     <Resource Include="BG.png" />
     <Resource Include="BK.png" />
     <Resource Include="BN.png" />
@@ -135,6 +145,18 @@
     <Resource Include="Holder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\YB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\YN.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\YQ.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\YR.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Pattern.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -142,6 +164,18 @@
     <Resource Include="Set.png" />
     <Resource Include="SetDefault.png" />
     <Resource Include="Start.png" />
+    <Resource Include="YB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="YN.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="YQ.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="YR.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

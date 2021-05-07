@@ -1,8 +1,5 @@
-﻿using System;
+﻿using ChessBoard.BoardAttributes;
 using System.Collections.Generic;
-using System.Text;
-using ChessBoard.BoardAttributes;
-using ChessBoard.Extensions;
 
 namespace ChessBoard.Figures
 {
@@ -36,8 +33,10 @@ namespace ChessBoard.Figures
         /// <returns>List of Cells under influance of Queen on the current Cell</returns>
         protected override List<Cell> GetInfluencedCells()
         {
-            List<Cell> cells = new List<Cell>();
-            cells.Add(CurrentCell);
+            List<Cell> cells = new List<Cell>
+            {
+                CurrentCell
+            };
 
             if (Color == Color.Black)
             {
@@ -68,8 +67,7 @@ namespace ChessBoard.Figures
 
         private List<Cell> GetMovementCells()
         {
-            List<Cell> cells = new List<Cell>();
-            //cells.Add(CurrentCell);
+            var cells = new List<Cell>();
 
             if (Color == Color.Black)
             {

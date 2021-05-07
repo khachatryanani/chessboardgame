@@ -1,8 +1,5 @@
-﻿using System;
+﻿using ChessBoard.BoardAttributes;
 using System.Collections.Generic;
-using System.Text;
-using ChessBoard.BoardAttributes;
-using ChessBoard.Extensions;
 
 namespace ChessBoard.Figures
 {
@@ -23,8 +20,10 @@ namespace ChessBoard.Figures
         /// <returns>List of Cells under influance of Queen on the current Cell</returns>
         protected override List<Cell> GetInfluencedCells()
         {
-            List<Cell> cells = new List<Cell>();
-            cells.Add(CurrentCell);
+            List<Cell> cells = new List<Cell>
+            {
+                CurrentCell
+            };
 
             int digN = CurrentCell.Number + 1;
             int digL = (int)CurrentCell.Letter + 1;

@@ -20,6 +20,9 @@ namespace KingdomChessGame_Desktop
 
         private Image MovingImage { get; set; }
 
+        private Grid PawnLastCell { get; set; }
+
+
         private bool PlayingWithWhites { get; set; }
 
 
@@ -113,19 +116,16 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">MouseEventArgs argument</param>
         private void Figure_MouseMove(object sender, MouseEventArgs e)
         {
-            if (MovingImage != null)
+            if (MovingImage != null && e.LeftButton == MouseButtonState.Pressed)
             {
-                if (e.LeftButton == MouseButtonState.Pressed)
-                {
-                    var position = e.GetPosition(this);
+                var position = e.GetPosition(this);
 
-                    double left = position.X;
-                    double top = position.Y;
+                double left = position.X;
+                double top = position.Y;
 
-                    MovingImage.Width = 80;
-                    MovingImage.Height = 80;
-                    MovingImage.Margin = new Thickness(left - MovingImage.Width / 2, top - MovingImage.Height / 2, 0, 0);
-                }
+                MovingImage.Width = 80;
+                MovingImage.Height = 80;
+                MovingImage.Margin = new Thickness(left - MovingImage.Width / 2, top - MovingImage.Height / 2, 0, 0);
             }
         }
 
@@ -164,11 +164,20 @@ namespace KingdomChessGame_Desktop
                     string cellTo = grid.Name;
                     if (_manager.IsValidCellToMove(cellFrom, cellTo))
                     {
+                        if (_manager.GameChoice == 1)
+                        {
+                            PlayingWithWhites = !PlayingWithWhites;
+                            LetPlayerMoveImages(PlayingWithWhites);
+                        }
+
+                        if (_manager.IsPawnUpgrade(cellFrom, cellTo))
+                        {
+                            this.PawnLastCell = grid;
+                            DisplayFigureChoice(grid.Margin.Left, grid.Margin.Top);
+                            DisableBoard();
+                        }
                         _manager.Play(cellFrom, cellTo);
                         _manager.InsertImage(MovingImage, grid);
-
-                        PlayingWithWhites = !PlayingWithWhites;
-                        LetPlayerMoveImages(PlayingWithWhites);
 
                         MovingImage = null;
 
@@ -195,6 +204,7 @@ namespace KingdomChessGame_Desktop
             }
 
             MovingImage = sender as Image;
+            //DisplayFigureChoice(MovingImage.Margin.Left, MovingImage.Margin.Top);
             int iZIndex = Canvas.GetZIndex(MovingImage);
             Canvas.SetZIndex(MovingImage, iZIndex + 1);
 
@@ -225,14 +235,13 @@ namespace KingdomChessGame_Desktop
             {
                 switch (choice)
                 {
-                    // Play winning algorithms
                     case 1:
                         foreach (var image in _manager.FigureImages)
                         {
                             image.MouseUp -= Placement_MouseUp;
                             _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
                         }
-
+                        PlayingWithWhites = true;
                         LetPlayerMoveImages(PlayingWithWhites);
                         break;
 
@@ -256,6 +265,7 @@ namespace KingdomChessGame_Desktop
                             _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
                         }
 
+                        _manager.SetTurn(false);
                         break;
                     // Play Knight moves
                     case 4:
@@ -266,6 +276,7 @@ namespace KingdomChessGame_Desktop
                 }
 
                 MessageBox.Text = _manager.MessageText;
+
             }
         }
 
@@ -287,6 +298,22 @@ namespace KingdomChessGame_Desktop
         private void ResetBtn_Click(object sender, RoutedEventArgs e)
         {
             _manager.ResetGame();
+            MessageBox.Text = string.Empty;
+            switch (_manager.GameChoice)
+            {
+                case 1:
+                    DefaultGame_Click(sender, e);
+                    break;
+                case 2:
+                    QueenEndgame_Click(sender, e);
+                    break;
+                case 3:
+                    RookEndgame_Click(sender, e);
+                    break;
+                case 4:
+                    KnightGame_Click(sender, e);
+                    break;
+            }
         }
 
         private void LetPlayerMoveImages(bool whitesTurn)
@@ -329,6 +356,15 @@ namespace KingdomChessGame_Desktop
             }
         }
 
+        private void DisableBoard()
+        {
+            foreach (var image in _manager.FigureImages)
+            {
+                image.MouseDown -= Figure_MouseDown;
+                image.MouseMove -= Figure_MouseMove;
+                image.MouseUp -= Figure_MouseUp;
+            }
+        }
         private void SetDefault_MouseEnter(object sender, MouseEventArgs e)
         {
             SetDefault.Source = new BitmapImage(new Uri(@"\Images\SetSelected.png", System.UriKind.Relative));
@@ -405,6 +441,80 @@ namespace KingdomChessGame_Desktop
             _manager.FiguresForGame = new List<string> { "BNP", "BN" };
 
             InitializeFigureHolder();
+        }
+
+        private void DisplayFigureChoice(double leftMargin, double marginTop)
+        {
+            FigureChoice.Visibility = Visibility.Visible;
+            FigureChoice.Margin = new Thickness(leftMargin - 60, marginTop - 50, 0, 0);
+        }
+
+        private void Image_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (FigureChoice.Margin.Top < 300)
+            {
+                switch ((sender as Image).Name)
+                {
+                    case "Q":
+                        (sender as Image).Source = _manager.GetImageSource("WQ");
+                        break;
+                    case "B":
+                        (sender as Image).Source = _manager.GetImageSource("WB");
+                        break;
+                    case "R":
+                        (sender as Image).Source = _manager.GetImageSource("WR");
+                        break;
+                    case "N":
+                        (sender as Image).Source = _manager.GetImageSource("WN");
+                        break;
+                }
+            }
+            else
+            {
+                switch ((sender as Image).Name)
+                {
+                    case "Q":
+                        (sender as Image).Source = _manager.GetImageSource("BQ");
+                        break;
+                    case "B":
+                        (sender as Image).Source = _manager.GetImageSource("BB");
+                        break;
+                    case "R":
+                        (sender as Image).Source = _manager.GetImageSource("BR");
+                        break;
+                    case "N":
+                        (sender as Image).Source = _manager.GetImageSource("BN");
+                        break;
+                }
+            }
+        }
+
+        private void Image_MouseLeave(object sender, MouseEventArgs e)
+        {
+            switch ((sender as Image).Name)
+            {
+                case "Q":
+                    (sender as Image).Source = _manager.GetImageSource("YQ");
+                    break;
+                case "B":
+                    (sender as Image).Source = _manager.GetImageSource("YB");
+                    break;
+                case "R":
+                    (sender as Image).Source = _manager.GetImageSource("YR");
+                    break;
+                case "N":
+                    (sender as Image).Source = _manager.GetImageSource("YN");
+                    break;
+            }
+        }
+
+      
+        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _manager.ChangeFigure(PawnLastCell, (sender as Image).Name);
+            FigureChoice.Visibility = Visibility.Hidden;
+            
+            LetPlayerMoveImages(PlayingWithWhites);
         }
     }
 }

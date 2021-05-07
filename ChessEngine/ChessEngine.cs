@@ -1,10 +1,8 @@
-﻿using System;
-using ChessBoard.BoardAttributes;
+﻿using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
 using static ChessBoard.ChessBoardManager;
+using System;
 using System.Collections.Generic;
-using ChessBoard.Extensions;
-using ChessBoard;
 
 namespace ChessEngineLogic
 {
@@ -62,8 +60,20 @@ namespace ChessEngineLogic
         public ChessEngine(string playerColor)
         {
             _turn = playerColor == "Black" ? Color.Black : Color.White;
+            ResetBoard();
         }
 
+        public void SetTurn(bool whites) 
+        {
+            if (whites)
+            {
+                _turn = Color.White;
+            }
+            else 
+            {
+                _turn = Color.Black;
+            }
+        }
         /// <summary>
         /// In the endgame, plays as Chess Engine.
         /// </summary>
@@ -110,9 +120,16 @@ namespace ChessEngineLogic
             {
                 return 1;
             }
+            else if (IsPawnUpgrade()) 
+            {
+                _turn = _turn == Color.White ? Color.Black : Color.White;
+                return 4;
+            }
 
             return 0;
         }
+
+
 
         /// <summary>
         /// Get the list of cell names for the figure that are possible to move to.
@@ -127,7 +144,7 @@ namespace ChessEngineLogic
 
             if (figure is King)
             {
-                if (IsShortCastelingPossible(figure.Color, out Cell cellToMoveS)) 
+                if (IsShortCastelingPossible(figure.Color, out Cell cellToMoveS))
                 {
                     possibleMoves.Add(cellToMoveS.ToString());
                 }
@@ -148,7 +165,6 @@ namespace ChessEngineLogic
                     }
                 }
             }
-
 
             foreach (var cell in figure.InfluencedCells)
             {
@@ -219,7 +235,7 @@ namespace ChessEngineLogic
             figure.Move(new Cell(cellTo));
 
             UpdateBoard(new Cell(cellFrom), new Cell(cellTo));
-            if (figure is King) 
+            if (figure is King)
             {
                 DoCasteling(figure);
             }
@@ -290,7 +306,7 @@ namespace ChessEngineLogic
             King king = GetTheKing(_turn);
 
             // Check if it is on cell under influence
-            return IsUnderCheckCell(king.CurrentCell, king.Color, out Figure influencingFigure);
+            return IsUnderCheckCell(king.CurrentCell, king.Color, out _);
         }
 
         /// Checks if it is a Mate situation in the game:
@@ -328,7 +344,7 @@ namespace ChessEngineLogic
             {
                 foreach (var item in king.InfluencedCells)
                 {
-                    if (!IsUnderCheckCell(item, king.Color, out Figure influencingFigure) && item != king.CurrentCell)
+                    if (!IsUnderCheckCell(item, king.Color, out _) && item != king.CurrentCell)
                     {
                         return false;
                     }

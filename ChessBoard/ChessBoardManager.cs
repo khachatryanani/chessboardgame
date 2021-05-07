@@ -1,7 +1,6 @@
-﻿using System;
-using ChessBoard.BoardAttributes;
+﻿using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
-using ChessBoard.Extensions;
+using System;
 using System.Collections.Generic;
 
 namespace ChessBoard
@@ -14,6 +13,11 @@ namespace ChessBoard
     {
         // Container for all the available figures on the board
         private static readonly Board _board = new Board();
+
+        public static void ResetBoard() 
+        {
+            _board.Clear();
+        }
 
         /// <summary>
         /// ChessManager can add figures to the board
@@ -53,7 +57,7 @@ namespace ChessBoard
         {
             foreach (var item in _board)
             {
-                if (item.InfluencedCells.ContainsCell(cellToMove) && item.Color != colorOfPlayer && IsPossibleToMove(item, cellToMove))
+                if (item.InfluencedCells.Contains(cellToMove) && item.Color != colorOfPlayer && IsPossibleToMove(item, cellToMove))
                 {
                     King king = GetTheKing(colorOfPlayer);
                     Cell kingCell = king.CurrentCell;
@@ -82,11 +86,24 @@ namespace ChessBoard
         {
             foreach (var item in _board)
             {
-                if (item.InfluencedCells.ContainsCell(cellToCheck) && item.Color != colorOfPlayer)
+                if (item.InfluencedCells.Contains(cellToCheck) && item.Color != colorOfPlayer)
                 {
                     return true;
                 }
             }
+            return false;
+        }
+
+        public static bool IsPawnUpgrade() 
+        {
+            foreach (var item in _board)
+            {
+                if (item is Pawn && ((item.Color == Color.Black && item.CurrentCell.Number == 1) || (item.Color == Color.White && item.CurrentCell.Number == 8)))
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
 
@@ -98,6 +115,10 @@ namespace ChessBoard
         /// <returns>True is it is possible to move the given figure to the given cell, False if not</returns>
         public static bool IsPossibleToMove(Figure figure, Cell cellToMove)
         {
+            if (!(figure is Pawn) && !figure.InfluencedCells.Contains(cellToMove)) 
+            {
+                return false;
+            }
             if (GetFigureByCell(cellToMove) != null && GetFigureByCell(cellToMove).Color == figure.Color)
             {
                 return false;
@@ -328,12 +349,13 @@ namespace ChessBoard
         {
             if (turn == Color.White)
             {
-                if (_board["F1"] == null && _board["G1"] == null)
+                if (_board["F1"] == null && !IsUnderCheckCell(new Cell ("F1"), turn, out _)
+                    && _board["G1"] == null && !IsUnderCheckCell(new Cell("G1"), turn, out _))
                 {
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("H1"));
 
-                    if (!king.HasMoved && !rook.HasMoved)
+                    if (rook != null && !king.HasMoved && !rook.HasMoved)
                     {
                         castelingKingCell = new Cell("G1");
                         return true;
@@ -342,12 +364,13 @@ namespace ChessBoard
             }
             else
             {
-                if (_board["F8"] == null && _board["G8"] == null)
+                if (_board["F8"] == null && !IsUnderCheckCell(new Cell("F8"), turn, out _)
+                    && _board["G8"] == null && !IsUnderCheckCell(new Cell("G8"), turn, out _))
                 {
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("H8"));
 
-                    if (!king.HasMoved && !rook.HasMoved)
+                    if (rook != null && !king.HasMoved && !rook.HasMoved)
                     {
                         castelingKingCell = new Cell("G8");
                         return true;
@@ -363,7 +386,9 @@ namespace ChessBoard
         {
             if (turn == Color.White)
             {
-                if (_board["B1"] == null && _board["C1"] == null && _board["D1"] == null)
+                if (_board["B1"] == null && !IsUnderCheckCell(new Cell("B1"), turn, out _) &&
+                    _board["C1"] == null && !IsUnderCheckCell(new Cell("C1"), turn, out _) &&
+                    _board["D1"] == null && !IsUnderCheckCell(new Cell("D1"), turn, out _))
                 {
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("A1"));
@@ -377,7 +402,9 @@ namespace ChessBoard
             }
             else
             {
-                if (_board["B8"] == null && _board["C8"] == null && _board["D8"] == null)
+                if (_board["B8"] == null && !IsUnderCheckCell(new Cell("B8"), turn, out _) &&
+                    _board["C8"] == null && !IsUnderCheckCell(new Cell("C8"), turn, out _) &&
+                    _board["D8"] == null && !IsUnderCheckCell(new Cell("D8"), turn, out _))
                 {
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("A8"));
@@ -415,8 +442,11 @@ namespace ChessBoard
 
         public static List<Cell> GetCheckDefenseCells(King king, Figure influencingFigure)
         {
-            var checkDefenseCells = new List<Cell>();
-            checkDefenseCells.Add(influencingFigure.CurrentCell);
+            var checkDefenseCells = new List<Cell>
+            {
+                influencingFigure.CurrentCell
+            };
+
             if (influencingFigure is Pawn || influencingFigure is Knight)
             {
                 return checkDefenseCells;
@@ -529,8 +559,7 @@ namespace ChessBoard
         private static bool IsCheck(Color kingColor)
         {
             var king = GetTheKing(kingColor);
-
-            return IsUnderCheckCell(king.CurrentCell, king.Color, out Figure influencingFigure);
+            return IsUnderCheckCell(king.CurrentCell, king.Color, out _);
         }
     }
 }

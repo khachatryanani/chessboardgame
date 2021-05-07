@@ -1,7 +1,5 @@
-﻿using System;
+﻿using ChessBoard.BoardAttributes;
 using System.Collections.Generic;
-using ChessBoard.BoardAttributes;
-using ChessBoard.Extensions;
 
 namespace ChessBoard.Figures
 {

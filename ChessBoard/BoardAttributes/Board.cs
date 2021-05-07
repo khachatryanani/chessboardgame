@@ -10,7 +10,7 @@ namespace ChessBoard.BoardAttributes
     public class Board : IEnumerable<Figure>
     {
         // Keeps figures in dictionary with their chessboard cell string representation as a key
-        private readonly Dictionary<string, Figure> _board = new Dictionary<string, Figure>();
+        private Dictionary<string, Figure> _board = new Dictionary<string, Figure>();
 
         //Indexer of the class
         public Figure this[string cell]
@@ -23,6 +23,11 @@ namespace ChessBoard.BoardAttributes
         public bool Remove(string key)
         {
             return _board.Remove(key);
+        }
+
+        public void Clear() 
+        {
+            _board = new Dictionary<string, Figure>();
         }
 
         //IEnumarator interface implementation

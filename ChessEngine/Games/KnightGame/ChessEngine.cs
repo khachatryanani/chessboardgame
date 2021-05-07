@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using ChessBoard.BoardAttributes;
+﻿using ChessBoard.BoardAttributes;
 using ChessBoard.Figures;
-using ChessBoard.Extensions;
-using static ChessBoard.ChessBoardManager;
-
+using System;
+using System.Collections.Generic;
 
 namespace ChessEngineLogic
 {
@@ -30,7 +27,7 @@ namespace ChessEngineLogic
             Cell target = cellTo;
             Cell start = cellFrom;
 
-            if (cellTo.Letter >= cellFrom.Letter && cellTo.Number <= cellFrom.Number) 
+            if (cellTo.Letter >= cellFrom.Letter && cellTo.Number <= cellFrom.Number)
             {
                 isReverted = true;
                 target = cellFrom;
@@ -39,13 +36,13 @@ namespace ChessEngineLogic
 
             Knight knight = new Knight(start, Color.Black);
             var cells = GetKnightMoveRelativeCells(number, letter);
-            
+
             List<string> path = new List<string>();
 
             foreach (var cell in cells)
             {
                 var point = new Cell((char)(target.Letter + cell.Item1), target.Number + cell.Item2);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point)) 
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
@@ -53,7 +50,7 @@ namespace ChessEngineLogic
                 }
 
                 point = new Cell((char)(target.Letter - cell.Item1), target.Number + cell.Item2);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
@@ -61,7 +58,7 @@ namespace ChessEngineLogic
                 }
 
                 point = new Cell((char)(target.Letter + cell.Item1), target.Number - cell.Item2);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
@@ -69,7 +66,7 @@ namespace ChessEngineLogic
                 }
 
                 point = new Cell((char)(target.Letter - cell.Item1), target.Number - cell.Item2);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
@@ -77,7 +74,7 @@ namespace ChessEngineLogic
                 }
 
                 point = new Cell((char)(target.Letter + cell.Item2), target.Number + cell.Item1);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
@@ -85,7 +82,7 @@ namespace ChessEngineLogic
                 }
 
                 point = new Cell((char)(target.Letter - cell.Item2), target.Number + cell.Item1);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
@@ -93,7 +90,7 @@ namespace ChessEngineLogic
                 }
 
                 point = new Cell((char)(target.Letter + cell.Item2), target.Number - cell.Item1);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
@@ -101,27 +98,30 @@ namespace ChessEngineLogic
                 }
 
                 point = new Cell((char)(target.Letter - cell.Item2), target.Number - cell.Item1);
-                if (IsValidCell(point) && knight.InfluencedCells.ContainsCell(point))
+                if (IsValidCell(point) && knight.InfluencedCells.Contains(point))
                 {
                     knight.Move(point);
                     path.Add(point.ToString());
                 }
             }
 
-            if (isReverted) 
+            if (isReverted)
             {
                 path.Reverse();
             }
             return path;
         }
 
-        
+
         private List<(int, int)> GetKnightMoveRelativeCells(int number, int letter)
         {
             int[,] template = CreateTemplate();
             int moves = template[number, letter];
-            List<(int, int)> cells = new List<(int, int)>();
-            cells.Add((number, letter));
+            var cells = new List<(int, int)>
+            {
+                (number, letter)
+            };
+
             for (int i = moves - 1; i >= 0; i--)
             {
                 if (number - 2 >= 0 && letter - 1 >= 0 && template[number - 2, letter - 1] == i)
@@ -194,7 +194,7 @@ namespace ChessEngineLogic
             return fixedTemplate;
         }
 
-        private bool IsValidCell(Cell cell) 
+        private bool IsValidCell(Cell cell)
         {
             return cell.Letter <= 72 && cell.Letter >= 65 && cell.Number <= 8 && cell.Number >= 1;
         }
