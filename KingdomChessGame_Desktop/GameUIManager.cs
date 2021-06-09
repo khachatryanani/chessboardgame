@@ -90,6 +90,20 @@ namespace KingdomChessGame_Desktop
             SetGameEngine();
         }
 
+        public void SetCurrentGame(GameViewModel game) 
+        {
+            _engine = new ChessEngine();
+            _engine.GameEvent += FigureMove;
+
+            _engine.CurrentGame = _mapper.Map<GameModel>(game);
+            _engine.SetTurn(game.Turn == game.White.Name);
+
+            foreach (var figure in game.Board)
+            {
+                CreateFigure(figure.Key, figure.Value.Substring(1, 1), figure.Value.Substring(0, 1));
+            }
+        }
+
         /// <summary>
         /// For the given Figure checks if the grid to move on is a valid cell in terms of chess game.
         /// </summary>
@@ -784,20 +798,20 @@ GetEmtpyGridByName("E2") ?? GetEmtpyGridByName("F2") ?? GetEmtpyGridByName("G2")
         public void ContinueGame(GameViewModel game) 
         {
             // Set current game board
-            ResetGame();
-            _engine.CurrentGame = ConvertViewModelToModel(game);
+            SetCurrentGame(game);
+            DrawBoardForGame(game);              
+        }
+
+        public void DrawBoardForGame(GameViewModel game) 
+        {
             foreach (var item in game.Board)
             {
-               
                 var image = GetImageByFigureName(item.Value, null);
                 image.Width = 60;
                 image.Height = 60;
                 var grid = GetGridByName(item.Key);
                 InsertImage(image, grid);
-                CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
             }
-            // give turn to play
-            SetTurn(game.Turn == game.White.Name);
         }
 
         public GameModel ConvertViewModelToModel(GameViewModel gameViewModel) 

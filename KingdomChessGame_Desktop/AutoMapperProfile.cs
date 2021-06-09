@@ -24,8 +24,16 @@ namespace KingdomChessGame_Desktop
                                              opt => opt.MapFrom(src => src.Result == 1 ? src.Turn ? src.Black.Name : src.White.Name : "N/A"))
                                 .ForPath(dest => dest.Turn,
                                              opt => opt.MapFrom(src => src.Result != 0 ? "N/A" : src.Turn ? src.White.Name : src.Black.Name));
-                
 
+                cfg.CreateMap<GameViewModel, GameModel>()
+                               .ForPath(dest => dest.StartDate,
+                                            opt => opt.Ignore())
+                               .ForPath(dest => dest.Result,
+                                            opt => opt.Ignore())
+                               .ForPath(dest => dest.Winner,
+                                            opt => opt.Ignore())
+                               .ForPath(dest => dest.Turn,
+                                            opt => opt.MapFrom(src => src.Turn == src.White.Name));
             });
 
             return new AutoMapper.Mapper(config);
