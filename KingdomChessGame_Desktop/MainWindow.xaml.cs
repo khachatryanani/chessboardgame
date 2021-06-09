@@ -1,5 +1,8 @@
-﻿using System;
+﻿using ChessEngineLogic;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,9 +25,7 @@ namespace KingdomChessGame_Desktop
 
         private Grid PawnLastCell { get; set; }
 
-
         private bool PlayingWithWhites { get; set; }
-
 
         public MainWindow()
         {
@@ -34,7 +35,10 @@ namespace KingdomChessGame_Desktop
 
             InitializeComponent();
             InitializeBoard();
+           
         }
+
+
 
         /// <summary>
         /// Draw figures on their initial positions on main window.
@@ -176,12 +180,18 @@ namespace KingdomChessGame_Desktop
                             DisplayFigureChoice(grid.Margin.Left, grid.Margin.Top);
                             DisableBoard();
                         }
+
+                        //if (_manager.IsPawnFork(cellFrom, cellTo)) 
+                        //{
+                        //    string imageToRemoveCell = $"{cellTo[0]}{cellFrom[1]}";
+                        //    _manager.RemoveFigureImageFromBoard(imageToRemoveCell);
+                        //}
                         _manager.Play(cellFrom, cellTo);
                         _manager.InsertImage(MovingImage, grid);
-
+                        UpdateGameStatusBox(_manager.GameStatus, _manager.CurrentPlayer);
                         MovingImage = null;
 
-                        MessageBox.Text = _manager.MessageText;
+                        //MessageBox.Text = _manager.MessageText;
                         return;
                     }
                 }
@@ -191,6 +201,31 @@ namespace KingdomChessGame_Desktop
             MovingImage = null;
         }
 
+        private void UpdateGameStatusBox(int gameStatus, bool player)
+        {
+            switch (gameStatus)
+            {
+                case 1:
+                    GameStatusImage.Source = _manager.GetImageSource(player ? "RWK" : "RBK");
+                    CurrentPlayersName.Content = $"{_manager.GetCurrentPlayerName()}'s turn";
+                    break;
+                case 2:
+                    GameStatusImage.Source = _manager.GetImageSource(player ? "MBP" : "MWP");
+                    CurrentPlayersName.Content = $"{_manager.GetWinnerName()} wins!";
+                    DisableBoard();
+                    break;
+                case 3:
+                    GameStatusImage.Source = _manager.GetImageSource("MSF");
+                    CurrentPlayersName.Content = $"It's a stalemate";
+                    DisableBoard();
+                    break;
+                default:
+                    GameStatusImage.Source = _manager.GetImageSource(player ? "WP" : "BP");
+                    CurrentPlayersName.Content = $"{_manager.GetCurrentPlayerName()}'s turn";
+                    break;
+            }
+
+        }
         /// <summary>
         /// Add the helper cells for the image figure.
         /// </summary>
@@ -204,7 +239,6 @@ namespace KingdomChessGame_Desktop
             }
 
             MovingImage = sender as Image;
-            //DisplayFigureChoice(MovingImage.Margin.Left, MovingImage.Margin.Top);
             int iZIndex = Canvas.GetZIndex(MovingImage);
             Canvas.SetZIndex(MovingImage, iZIndex + 1);
 
@@ -231,22 +265,26 @@ namespace KingdomChessGame_Desktop
         private void StartBtn_Click(object sender, RoutedEventArgs e)
         {
             int choice = _manager.GameChoice;
-            if (_manager.AreAllFiguresOnBoard())
-            {
-                switch (choice)
-                {
-                    case 1:
-                        foreach (var image in _manager.FigureImages)
-                        {
-                            image.MouseUp -= Placement_MouseUp;
-                            _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
-                        }
-                        PlayingWithWhites = true;
-                        LetPlayerMoveImages(PlayingWithWhites);
-                        break;
 
-                    case 2:
-                    case 3:
+            switch (choice)
+            {
+                case 1:
+                    foreach (var image in _manager.FigureImages)
+                    {
+                        image.MouseDown -= Placement_MouseDown;
+                        image.MouseUp -= Placement_MouseUp;
+                        _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
+                    }
+                    PlayingWithWhites = true;
+                    GameStatusImage.Source = _manager.GetImageSource("WP");
+                    CurrentPlayersName.Content = $"{_manager.GetCurrentPlayerName()}'s turn";
+                    LetPlayerMoveImages(PlayingWithWhites);
+                    break;
+
+                case 2:
+                case 3:
+                    if (_manager.AreAllFiguresOnBoard())
+                    {
                         foreach (var image in _manager.FigureImages)
                         {
                             if (image.Name[0] == 'B')
@@ -266,17 +304,21 @@ namespace KingdomChessGame_Desktop
                         }
 
                         _manager.SetTurn(false);
-                        break;
-                    // Play Knight moves
-                    case 4:
+                        GameStatusImage.Source = _manager.GetImageSource("BP");
+
+                    }
+
+                    break;
+                // Play Knight moves
+                case 4:
+                    if (_manager.AreAllFiguresOnBoard())
+                    {
                         string cellFrom = (string)_manager.FigureImages[1].Tag;
                         string cellTo = (string)_manager.FigureImages[0].Tag;
                         _manager.Play(cellFrom, cellTo);
-                        break;
-                }
+                    }
 
-                MessageBox.Text = _manager.MessageText;
-
+                    break;
             }
         }
 
@@ -298,7 +340,6 @@ namespace KingdomChessGame_Desktop
         private void ResetBtn_Click(object sender, RoutedEventArgs e)
         {
             _manager.ResetGame();
-            MessageBox.Text = string.Empty;
             switch (_manager.GameChoice)
             {
                 case 1:
@@ -354,6 +395,8 @@ namespace KingdomChessGame_Desktop
                     }
                 }
             }
+
+
         }
 
         private void DisableBoard()
@@ -407,8 +450,10 @@ namespace KingdomChessGame_Desktop
 
         private void Exit_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            _manager.SaveGame();
             this.Close();
         }
+
 
         private void DefaultGame_Click(object sender, RoutedEventArgs e)
         {
@@ -417,6 +462,7 @@ namespace KingdomChessGame_Desktop
                 "BP", "WP", "BP","WP","BP","WP","BP","WP", "BP", "WP","BP","WP","BP","WP","BP","WP" };
 
             InitializeFigureHolder();
+            _manager.SetGame();
         }
 
         private void QueenEndgame_Click(object sender, RoutedEventArgs e)
@@ -486,6 +532,7 @@ namespace KingdomChessGame_Desktop
                         (sender as Image).Source = _manager.GetImageSource("BN");
                         break;
                 }
+
             }
         }
 
@@ -508,13 +555,67 @@ namespace KingdomChessGame_Desktop
             }
         }
 
-      
         private void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
             _manager.ChangeFigure(PawnLastCell, (sender as Image).Name);
             FigureChoice.Visibility = Visibility.Hidden;
-            
+
             LetPlayerMoveImages(PlayingWithWhites);
+        }
+
+        private void Save_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Save.Source = new BitmapImage(new Uri(@"\Images\Save.png", System.UriKind.Relative));
+        }
+
+        private void Save_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Save.Source = new BitmapImage(new Uri(@"\Images\SaveSelected.png", System.UriKind.Relative));
+        }
+
+        private void SaveBtn_Click(object sender, MouseButtonEventArgs e)
+        {
+            _manager.SaveGame();
+            MessageBox.Show("Game succefully saved.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void Dashboard_Click(object sender, RoutedEventArgs e)
+        {
+            MainGrid.Visibility = Visibility.Hidden;
+            DashboardGrid.Visibility = Visibility.Visible;
+            
+            GamesListView.ItemsSource = _manager.LoadGameInfo();
+        }
+
+        private void GamePicker_Click(object sender, RoutedEventArgs e)
+        {
+            DashboardGrid.Visibility = Visibility.Hidden;
+            MainGrid.Visibility = Visibility.Visible;
+        }
+
+        private void ContinueBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (GamesListView.SelectedItem != null)
+            {
+                var game = GamesListView.SelectedItem as GameViewModel;
+
+                _manager.GameChoice = 1;
+                _manager.FiguresForGame = new List<string> { "BK", "WK", "BQ", "WQ", "BR","WR", "BR", "WR", "BN","WN", "BN", "WN", "BB","WB", "BB", "WB",
+                "BP", "WP", "BP","WP","BP","WP","BP","WP", "BP", "WP","BP","WP","BP","WP","BP","WP" };
+
+                InitializeFigureHolder();
+                foreach (var image in _manager.FigureImages)
+                {
+                    image.MouseDown -= Placement_MouseDown;
+                    image.MouseUp -= Placement_MouseUp;
+                    
+                }
+                _manager.ContinueGame(game);
+                PlayingWithWhites = game.Turn == game.White.Name;
+                LetPlayerMoveImages(PlayingWithWhites);
+                DashboardGrid.Visibility = Visibility.Hidden;
+                MainGrid.Visibility = Visibility.Visible;
+            }
         }
     }
 }

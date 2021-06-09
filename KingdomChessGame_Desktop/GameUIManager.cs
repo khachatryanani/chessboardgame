@@ -7,6 +7,9 @@ using System.Windows.Media.Imaging;
 using ChessEngineLogic;
 using System.Threading.Tasks;
 using System.Linq;
+using System.IO;
+using System.Text.Json;
+using AutoMapper;
 
 namespace KingdomChessGame_Desktop
 {
@@ -20,6 +23,10 @@ namespace KingdomChessGame_Desktop
         /// </summary>
         private ChessEngine _engine;
 
+        private readonly Mapper _mapper;
+
+        private List<string> _possibleMovesForSelectedFigure;
+
         /// <summary>
         /// Predefined colors for board cells on UI
         /// </summary>
@@ -28,6 +35,8 @@ namespace KingdomChessGame_Desktop
         private readonly Brush _blackColor = (Brush)(new BrushConverter().ConvertFrom("#43655A"));
         private readonly Brush _whiteColor = (Brush)(new BrushConverter().ConvertFrom("#A6B2BA"));
 
+        public bool CurrentPlayer { get; set; }
+        public int GameStatus { get; set; }
 
         public string MessageText { get; set; }
 
@@ -59,6 +68,7 @@ namespace KingdomChessGame_Desktop
             FiguresForGame = new List<string>();
             FigureImages = new List<Image>();
             GridBoard = new List<Grid>();
+            _mapper = AutoMapperProfile.InitializeMapper();
             SetGameEngine();
         }
 
@@ -68,9 +78,8 @@ namespace KingdomChessGame_Desktop
         private void SetGameEngine()
         {
             // To be changed into a dynamic choice
-            _engine = new ChessEngine("White");
-            _engine.FigureMoved += FigureMove;
-            _engine.GameStatusChanged += UpdateMessageText;
+            _engine = new ChessEngine();
+            _engine.GameEvent += FigureMove;
         }
 
         /// <summary>
@@ -89,8 +98,7 @@ namespace KingdomChessGame_Desktop
         /// <returns></returns>
         public bool IsValidCellToMove(string cellFrom, string cellTo)
         {
-            var possibleMoves = _engine.GetPossibleMoves(cellFrom);
-            return possibleMoves.Contains(cellTo);
+            return _possibleMovesForSelectedFigure.Contains(cellTo);
         }
 
         /// <summary>
@@ -100,15 +108,20 @@ namespace KingdomChessGame_Desktop
         /// <param name="gridToMoveTo">Grid that Image objects moves to.</param>
         public void InsertImage(Image imageToMove, Grid gridToMoveTo)
         {
-            var imageInGrid = GetImageByPosition(gridToMoveTo.Name);
-            if (imageInGrid != null)
-            {
-                var margins = GetImageDefaultMargins(imageInGrid.Name);
-                imageInGrid.Margin = new Thickness(margins.Item1, margins.Item2, 0, 0);
-                imageInGrid.Tag = null;
-            }
+
             imageToMove.Margin = new Thickness(gridToMoveTo.Margin.Left, gridToMoveTo.Margin.Top, 0, 0);
             imageToMove.Tag = gridToMoveTo.Name;
+        }
+
+        public void RemoveFigureImageFromBoard(string position) 
+        {
+            var imageToRemove = GetImageByPosition(position);
+            if (imageToRemove != null)
+            {
+                var margins = GetImageDefaultMargins(imageToRemove.Name);
+                imageToRemove.Margin = new Thickness(margins.Item1, margins.Item2, 0, 0);
+                imageToRemove.Tag = null;
+            }
         }
 
         /// <summary>
@@ -136,19 +149,43 @@ namespace KingdomChessGame_Desktop
         /// <param name="e">GameEvent arguments</param>
         private void FigureMove(object sender, GameEventArgs e)
         {
-            if (e.MovedFigure != null)
+            // beaten Figure if any
+            if (!String.IsNullOrEmpty(e.BeatenFigureName)) 
+            {
+                var beatenFigureImage = GetImageByFigureName(e.BeatenFigureName, e.BeatenFigureCell);
+                if (beatenFigureImage != null)
+                {
+                    var margins = GetImageDefaultMargins(beatenFigureImage.Name);
+                    beatenFigureImage.Margin = new Thickness(margins.Item1, margins.Item2, 0, 0);
+                    beatenFigureImage.Width = 80;
+                    beatenFigureImage.Height = 80;
+                    beatenFigureImage.Tag = null;
+                }
+            }
+
+            // Moved image
+            if (!String.IsNullOrEmpty(e.MovedFigureName))
             {
                 double top = GetGridByName(e.CellTo).Margin.Top;
                 double left = GetGridByName(e.CellTo).Margin.Left;
 
-                Image image = GetImageByFigureName(e.MovedFigure, e.CellFrom);
+                Image image = GetImageByFigureName(e.MovedFigureName, e.CellFrom);
 
                 image.Margin = new Thickness(left, top, 0, 0);
                 image.Tag = e.CellTo;
 
-                this.MessageText = GetMessageTextForDefaultGame(e.GameStatus, e.CurrentPlayer, e.WinnerPlayer);
             }
 
+            // Casteling if any
+            if (!String.IsNullOrEmpty(e.CastelingCellFrom)) 
+            {
+                var castelingRookImage = GetImageByPosition(e.CastelingCellFrom);
+                var castelingRookGrid = GetGridByName(e.CastelingCellTo);
+                InsertImage(castelingRookImage, castelingRookGrid);
+            }
+
+            GameStatus = e.GameStatus;
+            CurrentPlayer = e.CurrentPlayer;
         }
 
         /// <summary>
@@ -211,13 +248,13 @@ namespace KingdomChessGame_Desktop
             {
                 return;
             }
-            var possibleMoves = _engine.GetPossibleMoves(cellName);
 
-            foreach (var cell in possibleMoves)
+            _possibleMovesForSelectedFigure = _engine.GetPossibleMovesFromCurrentPosition(cellName);
+
+            foreach (var cell in _possibleMovesForSelectedFigure)
             {
                 Grid grid = GetGridByName(cell);
                 grid.Background = grid.Background == _blackColor ? _selectedBlackColor : _selectedWhiteColor;
-
             }
         }
 
@@ -227,9 +264,9 @@ namespace KingdomChessGame_Desktop
         /// <param name="cellName">Name of the grid that the figure was standing on.</param>
         public void RemoveHelpers(string cellName)
         {
-            var possibleMoves = _engine.GetPossibleMoves(cellName);
+            //var possibleMoves = _engine.GetPossibleMoves(cellName);
 
-            foreach (var cell in possibleMoves)
+            foreach (var cell in _possibleMovesForSelectedFigure)
             {
                 Grid grid = GetGridByName(cell);
                 grid.Background = grid.Background == _selectedBlackColor ? _blackColor : _whiteColor;
@@ -274,15 +311,11 @@ namespace KingdomChessGame_Desktop
                     AnimateMoveKnight(FigureImages[1], grids);
                     break;
                 case 2:
-                    _engine.PlayUser(cellFrom, cellTo);
+                    _engine.Play(cellFrom, cellTo);
                     _engine.PlayWinningWithQueenAndRookAlgorithm();
                     break;
-                case 3:
-                    _engine.PlayUser(cellFrom, cellTo);
-                    _engine.PlayWinningWithQueenAndTwoRooksAlgorithm();
-                    break;
                 case 1:
-                    _engine.PlayUser(cellFrom, cellTo);
+                    _engine.Play(cellFrom, cellTo);
                     break;
             }
         }
@@ -325,6 +358,8 @@ namespace KingdomChessGame_Desktop
             }
 
             return FigureImages;
+
+    
         }
 
         /// <summary>
@@ -455,7 +490,27 @@ namespace KingdomChessGame_Desktop
                     _ => new BitmapImage(new Uri(@"\Images\WP.png", UriKind.Relative)),
                 };
             }
-            else 
+            else if (figureName[0] == 'R') 
+            {
+                return (figureName[1]) switch
+                {
+                    'B' => new BitmapImage(new Uri(@"\Images\RBK.png", UriKind.Relative)),
+                    'W' => new BitmapImage(new Uri(@"\Images\RWK.png", UriKind.Relative)),
+                    _ => new BitmapImage(new Uri(@"\Images\WP.png", UriKind.Relative)),
+                };
+
+            }
+            else if (figureName[0] == 'M')
+            {
+                return (figureName[1]) switch
+                {
+                    'B' => new BitmapImage(new Uri(@"\Images\MBP.png", UriKind.Relative)),
+                    'W' => new BitmapImage(new Uri(@"\Images\MWP.png", UriKind.Relative)),
+                    _ => new BitmapImage(new Uri(@"\Images\MSF.png", UriKind.Relative)),
+                };
+
+            }
+            else
             {
                 return (figureName[1]) switch
                 {
@@ -465,6 +520,23 @@ namespace KingdomChessGame_Desktop
                     'N' => new BitmapImage(new Uri(@"\Images\YN.png", UriKind.Relative)),
                 };
             }
+        }
+
+        public List<GameViewModel> LoadGameInfo() 
+        {
+            var games =  _engine.LoadGameInfo();
+            var gamesViewModels = new List<GameViewModel>();
+            foreach (var game in games)
+            {
+                gamesViewModels.Add(_mapper.Map<GameViewModel>(game));
+            }
+
+            return gamesViewModels;
+        }
+
+        public List<PlayerViewModel> GetPlayers() 
+        {
+            return _mapper.Map<List<PlayerViewModel>>(_engine.GetPlayers());
         }
 
         /// <summary>
@@ -496,6 +568,11 @@ namespace KingdomChessGame_Desktop
                 image.Margin = new Thickness(grid.Margin.Left, grid.Margin.Top, 0, 0);
                 image.Tag = grid.Name;
             }
+        }
+
+        public Dictionary<string, string> GetCurrentBoard() 
+        {
+            return _engine.GetBoard();
         }
 
         /// <summary>
@@ -593,34 +670,7 @@ GetEmtpyGridByName("E2") ?? GetEmtpyGridByName("F2") ?? GetEmtpyGridByName("G2")
             return this.FigureImages.FirstOrDefault(image => (string)image.Tag == gridName);
         }
 
-        /// <summary>
-        /// Updates the message text property accoridng the game status after each move.
-        /// </summary>
-        /// <param name="sender">Chess Engine</param>
-        /// <param name="e">GameEventsArgs argument.</param>
-        private void UpdateMessageText(object sender, GameEventArgs e)
-        {
-            switch (e.GameStatus)
-            {
-                case 0:
-                    MessageText = $"{e.CurrentPlayer}'s turn to play.";
-                    break;
-                case 1:
-                    MessageText = $"{e.CurrentPlayer}'s king is under check.";
-                    break;
-                case 2:
-                    string winner = e.CurrentPlayer == "White" ? "Blacks" : "Whites";
-                    MessageText = $"Mate! {winner} win.";
-                    break;
-                case 3:
-                    MessageText = $"It's a stalemate...";
-                    break;
-                case 4:
-                    MessageText = $"Choose figure.";
-                    break;
-            }
-        }
-
+        
         public void ChangeFigure(Grid cellToChange, string chosenFigure) 
         {
             var figureImage = GetImageByPosition(cellToChange.Name);
@@ -680,5 +730,87 @@ GetEmtpyGridByName("E2") ?? GetEmtpyGridByName("F2") ?? GetEmtpyGridByName("G2")
             CreateFigure(cellToChange.Name, chosenFigure, color);
         }
 
+        public bool IsPawnFork(string cellFrom, string cellTo) 
+        {
+            var figureImage = GetImageByPosition(cellFrom);
+            return figureImage.Name[1] == 'P' && GetImageByPosition(cellTo) == null && cellFrom[0] != cellTo[0];
+        }
+
+        public void SaveGame() 
+        {
+            _engine.SaveGame();
+        }
+
+        public string GetCurrentPlayerName() 
+        {
+            if (CurrentPlayer)
+            {
+                return _engine.CurrentGame.White.Name;
+            }
+            else 
+            {
+                return _engine.CurrentGame.Black.Name;
+            }
+        }
+
+
+        public string GetWinnerName()
+        {
+            switch (_engine.CurrentGame.Winner) 
+            {
+                case null:
+                    return string.Empty;
+                case true:
+                    return _engine.CurrentGame.White.Name;
+                case false:
+                default:
+                    return _engine.CurrentGame.Black.Name;
+            }
+        }
+
+        public void SetGame()
+        {
+            var playerSetter = new Players();
+            playerSetter.ShowDialog();
+            if (playerSetter.DialogResult.Value)
+            {
+                _engine.SetGame();
+                _engine.CurrentGame.White = _mapper.Map<PlayerModel>( playerSetter.White);
+                _engine.CurrentGame.Black = _mapper.Map<PlayerModel>(playerSetter.Black);
+                CurrentPlayer = true;
+            }
+        }
+
+        public void ContinueGame(GameViewModel game) 
+        {
+            // Set current game board
+            ResetGame();
+            _engine.CurrentGame = ConvertViewModelToModel(game);
+            foreach (var item in game.Board)
+            {
+               
+                var image = GetImageByFigureName(item.Value, null);
+                image.Width = 60;
+                image.Height = 60;
+                var grid = GetGridByName(item.Key);
+                InsertImage(image, grid);
+                CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
+            }
+            // give turn to play
+            SetTurn(game.Turn == game.White.Name);
+        }
+
+        public GameModel ConvertViewModelToModel(GameViewModel gameViewModel) 
+        {
+            var game = new GameModel();
+            game.StartDate = Convert.ToDateTime(gameViewModel.StartDate);
+            game.Board = gameViewModel.Board;
+            game.White.Name = gameViewModel.White.Name;
+            game.Black.Name = gameViewModel.Black.Name;
+            game.Turn = gameViewModel.Turn == gameViewModel.White.Name;
+            game.MovesLog = gameViewModel.MovesLog;
+
+            return game;
+        }
     }
 }

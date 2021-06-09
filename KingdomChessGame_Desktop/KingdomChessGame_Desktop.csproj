@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="BB.png" />
     <None Remove="BG.png" />
-    <None Remove="BK.png" />
     <None Remove="BN.png" />
     <None Remove="BP.png" />
     <None Remove="BQ.png" />
@@ -28,9 +26,14 @@
     <None Remove="Images\Exit.png" />
     <None Remove="Images\ExitSelected.png" />
     <None Remove="Images\holder.png" />
+    <None Remove="Images\MBP.png" />
+    <None Remove="Images\MSF.png" />
+    <None Remove="Images\MWP.png" />
     <None Remove="Images\phantom.png" />
     <None Remove="Images\Reset.png" />
     <None Remove="Images\ResetSelected.png" />
+    <None Remove="Images\RWK.png" />
+    <None Remove="Images\Save.png" />
     <None Remove="Images\Set.png" />
     <None Remove="Images\SetSelected.png" />
     <None Remove="Images\Start.png" />
@@ -46,15 +49,19 @@
     <None Remove="Images\YN.png" />
     <None Remove="Images\YQ.png" />
     <None Remove="Images\YR.png" />
-    <None Remove="Pattern.png" />
+    <None Remove="RBK.png" />
     <None Remove="Reset.png" />
+    <None Remove="Save.png" />
+    <None Remove="SaveSelected.png" />
     <None Remove="Set.png" />
     <None Remove="SetDefault.png" />
     <None Remove="Start.png" />
-    <None Remove="YB.png" />
-    <None Remove="YN.png" />
+    <None Remove="WP.png" />
     <None Remove="YQ.png" />
-    <None Remove="YR.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,9 +69,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="BB.png" />
-    <Resource Include="BG.png" />
-    <Resource Include="BK.png" />
+    <Resource Include="BG.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="BN.png" />
     <Resource Include="BP.png" />
     <Resource Include="BQ.png" />
@@ -103,6 +110,15 @@
     <Resource Include="Images\holder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\MBP.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\MSF.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\MWP.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\phantom.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -110,6 +126,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\ResetSelected.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\RWK.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Save.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\Set.png">
@@ -157,25 +179,19 @@
     <Resource Include="Images\YR.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Pattern.png">
+    <Resource Include="Images\RBK.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Reset.png" />
+    <Resource Include="Images\SaveSelected.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Save.png" />
     <Resource Include="Set.png" />
     <Resource Include="SetDefault.png" />
     <Resource Include="Start.png" />
-    <Resource Include="YB.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="YN.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="YQ.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="YR.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="WP.png" />
+    <Resource Include="YQ.png" />
   </ItemGroup>
 
 </Project>

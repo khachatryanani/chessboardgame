@@ -8,17 +8,13 @@
         Title="Kingdom Chess" Height="820" Width="800" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" WindowStyle="None">
     <Grid x:Name="WindowGrid" >
         <Image x:Name="BG" Source="/BG.png" Stretch="Fill" />
-        <Grid Width="161" Height="820" VerticalAlignment="Center" HorizontalAlignment="Left" Background="#81989E" Opacity="0.8">
-
-        </Grid>
-        <Grid x:Name="MainGrid" >
-
+        <Grid x:Name="MainGrid" Visibility="Visible">
+            <Grid Width="161" Height="820" VerticalAlignment="Center" HorizontalAlignment="Left" Background="#81989E" Opacity="0.8"></Grid>
             <!--images-->
             <Image Name="SetDefault" Stretch="Fill" Source="/Set.png" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="100" MouseEnter="SetDefault_MouseEnter" MouseLeave="SetDefault_MouseLeave" MouseDown="DefaultSetBtn_Click" Margin="23,163,0,0"/>
             <Image Name="Reset" Stretch="Fill" Source="/Reset.png" MouseEnter="Reset_MouseEnter" MouseLeave="Reset_MouseLeave" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="100" MouseDown="ResetBtn_Click" Margin="23,286,0,0"/>
             <Image Name="Start" Stretch="Fill" Source="/Start.png" MouseEnter="Start_MouseEnter" MouseLeave="Start_MouseLeave" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="100" MouseDown="StartBtn_Click" Margin="23,410,0,0"/>
-
-
+            <Image Name="Save" Stretch="Fill" Source="/Save.png" MouseEnter="Save_MouseEnter" MouseLeave="Save_MouseLeave" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="100" MouseDown="SaveBtn_Click" Margin="23,532,0,0"/>
             <Image Name="WHolder" Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="268,85,0,0" Height="91" Width="463" />
             <Image Name="BHolder"   Stretch="Fill" Source="/Holder.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="268,720,0,0" Height="91" Width="463" />
 
@@ -41,48 +37,77 @@
             <Label Content="H" FontSize="18" Foreground="White" HorizontalAlignment="Left" Height="30" Margin="689,670,0,0" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center"/>
 
             <!--textblocks-->
-            <TextBlock Name="MessageBox" Background="Transparent" 
-                       Foreground="#EAC43D" Padding="10" 
-                       FontSize="20"
-                       TextWrapping="Wrap" Width="141" 
-                       Height="162" VerticalAlignment="Top" 
-                       HorizontalAlignment="Left" Margin="10,648,0,0"></TextBlock>
+            <Grid x:Name="GameStatusBox" Width="141" Height="131" VerticalAlignment="Top" 
+                       HorizontalAlignment="Left" Margin="10,670,0,0">
+                <Image x:Name="GameStatusImage" Width="100" Height="100" Stretch="Fill" Margin="0,1,0,30"></Image>
+                <Label x:Name="CurrentPlayersName" FontSize="18" VerticalAlignment="Top"  HorizontalAlignment="Center" HorizontalContentAlignment="Center" Foreground="#EAC43D" Margin="0,97,0,0" Width="141" Height="34"></Label>
+            </Grid>
+
 
 
             <!--selection boxes-->
-            <Menu VerticalAlignment="Top" HorizontalAlignment="Center" Background="#EBEBEB" BorderThickness="0" Width="800" Height="30">
-                <MenuItem Header="Pick Your Game" Width="161" Height="30" BorderThickness="0" FontSize="16">
-                    <MenuItem Name="DefaultGame" Header="Default Game" Click="DefaultGame_Click">
-                        <MenuItem.Icon>
-                            <Image Source="/BP.png" Width="18" Height="18" Stretch="Fill"></Image>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Name="QueenEndgame" Header="Queen Endgame" Click="QueenEndgame_Click">
-                        <MenuItem.Icon>
-                            <Image Source="/BQ.png"  Width="18" Height="18" Stretch="Fill"></Image>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Name="RookEndgame" Header="Rooks Endgame" Click="RookEndgame_Click">
-                        <MenuItem.Icon>
-                            <Image Source="/BR.png" Width="18" Height="18" Stretch="Fill"></Image>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Name="KnightGame" Header="Knight Moves Game" Click="KnightGame_Click">
-                        <MenuItem.Icon>
-                            <Image Source="/BN.png" Width="18" Height="18" Stretch="Fill" ></Image>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </MenuItem>
-            </Menu>
-            <Image Name="Exit" Source="/Exit.png" Margin="770,0,0,790" MouseEnter="Exit_MouseEnter" MouseLeave="Exit_MouseLeave" MouseDown="Exit_MouseDown"></Image>
-        </Grid>
 
-        <Grid x:Name="FigureChoice" Visibility="Visible" VerticalAlignment="Top" HorizontalAlignment="Left" Height="134" Margin="300,140,0,0" Width="170">
+        </Grid>
+        <Grid x:Name="FigureChoice" Visibility="Hidden" VerticalAlignment="Top" HorizontalAlignment="Left" Height="134" Margin="300,140,0,0" Width="170">
             <Image x:Name="Q" Stretch="Fill" Source="/YQ.png" Height="50" Width="50" Margin="34,1,86,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown" />
             <Image x:Name="N" Stretch="Fill" Source="/YN.png" Height="50" Width="50" Margin="114,51,6,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
             <Image x:Name="B" Stretch="Fill" Source="/YB.png" Height="50" Width="50" Margin="89,1,31,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
             <Image x:Name="R" Stretch="Fill" Source="/YR.png" Height="50" Width="50" Margin="9,51,111,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
 
+        </Grid>
+        <Menu VerticalAlignment="Top" HorizontalAlignment="Center" Background="#EBEBEB" BorderThickness="0" Width="800" Height="30">
+            <MenuItem Header="Pick Your Game" Width="161" Height="30" BorderThickness="0" FontSize="16" Click="GamePicker_Click">
+                <MenuItem Name="DefaultGame" Header="Default Game" Click="DefaultGame_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/BP.png" Width="18" Height="18" Stretch="Fill"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="QueenEndgame" Header="Queen Endgame" Click="QueenEndgame_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/BQ.png"  Width="18" Height="18" Stretch="Fill"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="RookEndgame" Header="Rooks Endgame" Click="RookEndgame_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/BR.png" Width="18" Height="18" Stretch="Fill"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="KnightGame" Header="Knight Moves Game" Click="KnightGame_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/BN.png" Width="18" Height="18" Stretch="Fill" ></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Dashboard" Width="161" Height="30" BorderThickness="0" FontSize="16" Click="Dashboard_Click" >
+
+            </MenuItem>
+
+        </Menu>
+        <Image Name="Exit" Source="/Exit.png" Margin="770,0,0,790" MouseEnter="Exit_MouseEnter" MouseLeave="Exit_MouseLeave" MouseDown="Exit_MouseDown"></Image>
+        <Grid x:Name="DashboardGrid" Visibility="Hidden" Height="500" Width="700" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#263A34" Opacity="0.8">
+            <ListView x:Name="GamesListView" HorizontalAlignment="Center" 
+                  Height="Auto"
+                  MaxHeight="450"
+                  Width="Auto"
+                  Margin="0,82,0,0" 
+                  VerticalAlignment="Top" 
+                  BorderThickness="0"
+                  Background="Transparent"
+                  ItemContainerStyle="{StaticResource ListViewTheme}">
+                <ListView.View>
+                    <GridView >
+                        <GridViewColumn Header="Game Date" DisplayMemberBinding="{Binding StartDate}" Width="100" />
+                        <GridViewColumn Header="Result" DisplayMemberBinding="{Binding Result}" Width="100"/>
+                        <GridViewColumn Header="Whites" DisplayMemberBinding="{Binding White.Name}" Width="100"/>
+                        <GridViewColumn Header="Blacks" DisplayMemberBinding="{Binding Black.Name}" Width="100"/>
+                        <GridViewColumn Header="Winner" DisplayMemberBinding="{Binding Winner}" Width="100"/>
+                        <GridViewColumn Header="Turn" DisplayMemberBinding="{Binding Turn}" Width="100"/>
+
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <Button Content="Continue" Name="ContinueBtn" HorizontalAlignment="Left" Height="23" Margin="438,54,0,0" VerticalAlignment="Top" Width="103" Click="ContinueBtn_Click"/>
+            <Button Content="View on Board" x:Name="View" HorizontalAlignment="Left" Height="23" Margin="550,54,0,0" VerticalAlignment="Top" Width="103"/>
         </Grid>
     </Grid>
 </Window>

@@ -1,0 +1,17 @@
+﻿<Window x:Class="KingdomChessGame_Desktop.Players"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KingdomChessGame_Desktop"
+        mc:Ignorable="d"
+        Title="Setting Players" Height="200" Width="300" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" >
+    <Grid>
+        <ComboBox Name="Whites" HorizontalAlignment="Left" Height="25"  VerticalAlignment="Top" Width="110" Margin="26,10,0,0"/>
+        <ComboBox Name="Blacks" HorizontalAlignment="Left" Height="25"  VerticalAlignment="Top" Width="110" Margin="150,10,0,0"/>
+        <Button Content="Submit Players" Background="#EAC43D" HorizontalAlignment="Left" Height="27"  VerticalAlignment="Top" Width="234" Margin="26,128,0,0" Click="Button_Click"/>
+        <Image Width="80" Height="80" Source="/WP.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="41,40,0,0"/>
+        <Image Width="80" Height="80" Source="/BP.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="165,40,0,0"/>
+
+    </Grid>
+</Window>

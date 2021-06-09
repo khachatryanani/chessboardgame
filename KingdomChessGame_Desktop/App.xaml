@@ -4,6 +4,13 @@
              xmlns:local="clr-namespace:KingdomChessGame_Desktop"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/ListViewTheme.xaml"/>
+
+            </ResourceDictionary.MergedDictionaries>
+
+           
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -1,21 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ChessGame;
 
 namespace ChessEngineLogic
 {
     /// <summary>
     /// Chess Game event arguments that will be sent to event handlers.
     /// </summary>
-    public class GameEventArgs : EventArgs
+    public class GameEventArgs : FigureMoveEventArgs
     {
-        public string MovedFigure { get; set; }
-        public string CellFrom { get; set; }
-        public string CellTo { get; set; }
-        public int GameStatus { get; set; }
-        public string CurrentPlayer { get; set; }
-        public string WinnerPlayer { get; set; }
-
-        public GameEventArgs() { }
+        public GameEventArgs(FigureMoveEventArgs e)
+        {
+            MovedFigureName = e.MovedFigureName;
+            BeatenFigureName = e.BeatenFigureName;
+            BeatenFigureCell = e.BeatenFigureCell;
+            CellFrom = e.CellFrom;
+            CellTo = e.CellTo;
+            CastelingCellFrom = e.CastelingCellFrom;
+            CastelingCellTo = e.CastelingCellTo;
+            GameStatus = e.GameStatus;
+            CurrentPlayer = e.CurrentPlayer;
+            WinnerPlayer = e.WinnerPlayer;
+        }
     }
 }

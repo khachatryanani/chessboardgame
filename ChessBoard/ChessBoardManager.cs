@@ -14,6 +14,9 @@ namespace ChessBoard
         // Container for all the available figures on the board
         private static readonly Board _board = new Board();
 
+        private static Figure _lastMoved;
+
+        private static Dictionary<string, string> Log = new Dictionary<string, string>();
         public static void ResetBoard() 
         {
             _board.Clear();
@@ -126,7 +129,7 @@ namespace ChessBoard
 
             if (figure is Pawn)
             {
-                return GetFigureByCell(cellToMove) != null;
+                return (GetFigureByCell(cellToMove) != null) || IsPawnForkPossible(figure, cellToMove);
             }
 
             char letterMoveFrom = figure.CurrentCell.Letter;
@@ -270,15 +273,17 @@ namespace ChessBoard
         /// <returns>The Figure object from the chess board container</returns>
         public static Figure GetFigureByCell(Cell cellOfFigure)
         {
-            foreach (var item in _board)
-            {
-                if (item.CurrentCell == cellOfFigure)
-                {
-                    return item;
-                }
-            }
+            //foreach (var item in _board)
+            //{
+            //    if (item.CurrentCell == cellOfFigure)
+            //    {
+            //        return item;
+            //    }
+            //}
 
-            return null;
+            //return null;
+
+            return _board[cellOfFigure.ToString()];
         }
 
         /// <summary>
@@ -333,13 +338,23 @@ namespace ChessBoard
             string newCell = movedTo.ToString();
 
             Figure temp = _board[oldCell];
+            Log.Add(temp.Name, movedTo.ToString());
+
+            if (IsPawnForkPossible(temp, movedTo)) 
+            {
+                _board.Remove(_lastMoved.CurrentCell.ToString());
+            }
+
             _board.Remove(oldCell);
             _board[newCell] = temp;
+
+            _lastMoved = temp;
         }
 
+
+        
         public static bool IsPossibleMoveForCurrentPosition(Figure figureToMove, Cell cellTo)
         {
-
             return IsPossibleToMove(figureToMove, cellTo) &&
                    IsCheckDefenseCell(figureToMove, cellTo) &&
                    IsNotOpeningCheck(figureToMove, cellTo);
@@ -560,6 +575,14 @@ namespace ChessBoard
         {
             var king = GetTheKing(kingColor);
             return IsUnderCheckCell(king.CurrentCell, king.Color, out _);
+        }
+
+        private static bool IsPawnForkPossible(Figure figureToMove, Cell cellTo) 
+        {
+            return figureToMove is Pawn && _lastMoved is Pawn &&
+                (_lastMoved as Pawn).MovedFirstTime &&
+                figureToMove.CurrentCell.Number == _lastMoved.CurrentCell.Number &&
+                Math.Abs(figureToMove.CurrentCell.Letter - _lastMoved.CurrentCell.Letter) == 1 && cellTo.Letter == _lastMoved.CurrentCell.Letter;
         }
     }
 }

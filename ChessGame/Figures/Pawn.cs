@@ -1,8 +1,7 @@
-﻿using ChessBoard.BoardAttributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace ChessBoard.Figures
+namespace ChessGame
 {
     public class Pawn : Figure
     {

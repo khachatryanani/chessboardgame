@@ -1,5 +1,4 @@
-﻿using ChessBoard.BoardAttributes;
-using ChessBoard.Figures;
+﻿using ChessGame;
 using System;
 using System.Collections.Generic;
 
