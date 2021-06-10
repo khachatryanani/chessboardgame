@@ -12,6 +12,7 @@ namespace KingdomChessGame_Desktop
 
         // 0 - paused, lost, 1 - mate, 0.5 - stalemate
         public string Result { get; set; }
+        public int Status { get; set; }
         public string Winner { get; set; }
         public string Turn { get; set; }
         public PlayerViewModel White { get; set; }

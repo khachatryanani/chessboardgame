@@ -666,7 +666,7 @@ namespace ChessGame
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("A1"));
 
-                    if (!king.HasMoved && !rook.HasMoved)
+                    if (!king.HasMoved && rook!=null && !rook.HasMoved)
                     {
                         castelingKingCell = new Cell("C1");
                         return true;
@@ -682,7 +682,7 @@ namespace ChessGame
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("A8"));
 
-                    if (!king.HasMoved && !rook.HasMoved)
+                    if (!king.HasMoved && rook!=null && !rook.HasMoved)
                     {
                         castelingKingCell = new Cell("C8");
                         return true;

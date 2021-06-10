@@ -35,9 +35,6 @@ namespace KingdomChessGame_Desktop
         private readonly Brush _blackColor = (Brush)(new BrushConverter().ConvertFrom("#43655A"));
         private readonly Brush _whiteColor = (Brush)(new BrushConverter().ConvertFrom("#A6B2BA"));
 
-        public bool CurrentPlayer { get; set; }
-        public int GameStatus { get; set; }
-
         public string MessageText { get; set; }
 
         /// <summary>
@@ -198,8 +195,9 @@ namespace KingdomChessGame_Desktop
                 InsertImage(castelingRookImage, castelingRookGrid);
             }
 
-            GameStatus = e.GameStatus;
-            CurrentPlayer = e.CurrentPlayer;
+
+            //GameStatus = e.GameStatus;
+            //CurrentPlayer = e.CurrentPlayer;
         }
 
         /// <summary>
@@ -320,7 +318,7 @@ namespace KingdomChessGame_Desktop
                     {
                         grids[i] = GetGridByName(moves[i]);
                     }
-                    this.MessageText = $"Knight needs {moves.Count - 1} move(s) to reach from " +
+                    this.MessageText = $"Knight needs {moves.Count} move(s) to reach from " +
                                        $"{(string)FigureImages[1].Tag} to {(string)FigureImages[0].Tag}";
                     AnimateMoveKnight(FigureImages[1], grids);
                     break;
@@ -462,6 +460,8 @@ namespace KingdomChessGame_Desktop
 
             return (marginLeft, marginTop);
         }
+
+
 
         /// <summary>
         /// Gets the Image source based on teh figure name.
@@ -757,7 +757,7 @@ GetEmtpyGridByName("E2") ?? GetEmtpyGridByName("F2") ?? GetEmtpyGridByName("G2")
 
         public string GetCurrentPlayerName() 
         {
-            if (CurrentPlayer)
+            if (_engine.CurrentGame.Turn)
             {
                 return _engine.CurrentGame.White.Name;
             }
@@ -767,6 +767,15 @@ GetEmtpyGridByName("E2") ?? GetEmtpyGridByName("F2") ?? GetEmtpyGridByName("G2")
             }
         }
 
+        public bool GetCurrentTurn() 
+        {
+            return _engine.CurrentGame.Turn;
+        }
+
+        public int GetCurrentGameStatus() 
+        {
+            return _engine.CurrentGame.Status;
+        }
 
         public string GetWinnerName()
         {
@@ -788,10 +797,10 @@ GetEmtpyGridByName("E2") ?? GetEmtpyGridByName("F2") ?? GetEmtpyGridByName("G2")
             playerSetter.ShowDialog();
             if (playerSetter.DialogResult.Value)
             {
-                _engine.SetGame();
+                _engine.SetGame(GameChoice);
                 _engine.CurrentGame.White = _mapper.Map<PlayerModel>( playerSetter.White);
                 _engine.CurrentGame.Black = _mapper.Map<PlayerModel>(playerSetter.Black);
-                CurrentPlayer = true;
+                
             }
         }
 

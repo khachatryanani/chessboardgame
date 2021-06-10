@@ -46,10 +46,13 @@ namespace ChessEngineLogic
 
         private void OnFigureMoved(object sender, FigureMoveEventArgs e) 
         {
-            CurrentGame.MovesLog.Add(new Tuple<string, string, string>(e.MovedFigureName,e.CellFrom, e.CellTo));
-            CurrentGame.Turn = e.CurrentPlayer;
-            CurrentGame.Winner = e.WinnerPlayer;
-            CurrentGame.Status = e.GameStatus;
+            if (CurrentGame != null) 
+            {
+                CurrentGame.MovesLog.Add(new Tuple<string, string, string>(e.MovedFigureName, e.CellFrom, e.CellTo));
+                CurrentGame.Turn = e.CurrentPlayer;
+                CurrentGame.Winner = e.WinnerPlayer;
+                CurrentGame.Status = e.GameStatus;
+            }
             GameEvent?.Invoke(this, new GameEventArgs(e));
         }
    
@@ -110,10 +113,19 @@ namespace ChessEngineLogic
             }
         }
 
-        public void SetGame()
+        public void SetGame(int gamechoice = 1)
         {
             CurrentGame = new GameModel { StartDate = DateTime.Now };
             CurrentGame.MovesLog = new List<Tuple<string, string, string>>();
+            switch (gamechoice) 
+            {
+                case 1:
+                    CurrentGame.Turn = true;
+                    break;
+                case 2:
+                    CurrentGame.Turn = false;
+                    break;
+            }
         }
 
         public  List<PlayerModel> GetPlayers() 

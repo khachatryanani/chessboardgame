@@ -188,10 +188,10 @@ namespace KingdomChessGame_Desktop
                         //}
                         _manager.Play(cellFrom, cellTo);
                         _manager.InsertImage(MovingImage, grid);
-                        UpdateGameStatusBox(_manager.GameStatus, _manager.CurrentPlayer);
+                        
+                        UpdateGameStatusBox();
                         MovingImage = null;
 
-                        //MessageBox.Text = _manager.MessageText;
                         return;
                     }
                 }
@@ -201,17 +201,21 @@ namespace KingdomChessGame_Desktop
             MovingImage = null;
         }
 
-        private void UpdateGameStatusBox(int gameStatus, bool player)
+        private void UpdateGameStatusBox()
         {
-            switch (gameStatus)
+            int currentStatus = _manager.GetCurrentGameStatus();
+            bool currentTurn = _manager.GetCurrentTurn();
+            string currentPlayerName = _manager.GetCurrentPlayerName();
+
+            switch (currentStatus)
             {
                 case 1:
-                    GameStatusImage.Source = _manager.GetImageSource(player ? "RWK" : "RBK");
-                    CurrentPlayersName.Content = $"{_manager.GetCurrentPlayerName()}'s turn";
+                    GameStatusImage.Source = _manager.GetImageSource(currentTurn ? "RWK" : "RBK");
+                    CurrentPlayersName.Content = $"{currentPlayerName}'s turn";
                     break;
                 case 2:
-                    GameStatusImage.Source = _manager.GetImageSource(player ? "MBP" : "MWP");
-                    CurrentPlayersName.Content = $"{_manager.GetWinnerName()} wins!";
+                    GameStatusImage.Source = _manager.GetImageSource(currentTurn ? "MBP" : "MWP");
+                    CurrentPlayersName.Content = $"{currentPlayerName} wins!";
                     DisableBoard();
                     break;
                 case 3:
@@ -220,8 +224,8 @@ namespace KingdomChessGame_Desktop
                     DisableBoard();
                     break;
                 default:
-                    GameStatusImage.Source = _manager.GetImageSource(player ? "WP" : "BP");
-                    CurrentPlayersName.Content = $"{_manager.GetCurrentPlayerName()}'s turn";
+                    GameStatusImage.Source = _manager.GetImageSource(currentTurn ? "WP" : "BP");
+                    CurrentPlayersName.Content = $"{currentPlayerName}'s turn";
                     break;
             }
 
@@ -257,6 +261,8 @@ namespace KingdomChessGame_Desktop
             Canvas.SetZIndex(MovingImage, iZIndex + 1);
         }
 
+      
+
         /// <summary>
         /// Start the game according to the user selection.
         /// </summary>
@@ -276,8 +282,9 @@ namespace KingdomChessGame_Desktop
                         _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
                     }
                     PlayingWithWhites = true;
-                    GameStatusImage.Source = _manager.GetImageSource("WP");
-                    CurrentPlayersName.Content = $"{_manager.GetCurrentPlayerName()}'s turn";
+                    //GameStatusImage.Source = _manager.GetImageSource("WP");
+                    //CurrentPlayersName.Content = $"{_manager.GetCurrentPlayerName()}'s turn";
+                    UpdateGameStatusBox();
                     LetPlayerMoveImages(PlayingWithWhites);
                     break;
 
@@ -303,8 +310,8 @@ namespace KingdomChessGame_Desktop
                             _manager.CreateFigure((string)image.Tag, image.Name.Substring(1, 1), image.Name.Substring(0, 1));
                         }
 
-                        _manager.SetTurn(false);
-                        GameStatusImage.Source = _manager.GetImageSource("BP");
+                        //_manager.SetTurn(false);
+                        UpdateGameStatusBox();
 
                     }
 
@@ -316,6 +323,7 @@ namespace KingdomChessGame_Desktop
                         string cellFrom = (string)_manager.FigureImages[1].Tag;
                         string cellTo = (string)_manager.FigureImages[0].Tag;
                         _manager.Play(cellFrom, cellTo);
+                        
                     }
 
                     break;
@@ -471,6 +479,8 @@ namespace KingdomChessGame_Desktop
             _manager.FiguresForGame = new List<string> { "BK", "WK", "WQ", "WR" };
 
             InitializeFigureHolder();
+            _manager.SetGame();
+
         }
 
         private void RookEndgame_Click(object sender, RoutedEventArgs e)
@@ -611,6 +621,7 @@ namespace KingdomChessGame_Desktop
                     
                 }
                 _manager.ContinueGame(game);
+                UpdateGameStatusBox();
                 PlayingWithWhites = game.Turn == game.White.Name;
                 LetPlayerMoveImages(PlayingWithWhites);
                 DashboardGrid.Visibility = Visibility.Hidden;

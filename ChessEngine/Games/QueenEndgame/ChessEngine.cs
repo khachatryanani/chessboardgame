@@ -170,8 +170,8 @@ namespace ChessEngineLogic
                     {
                         queen.Move(queenCellTo);
 
-                        _boardManager.UpdatePosition(queen, queenCellFrom, queenCellTo);
                         _boardManager.ChangeTurn();
+                        _boardManager.UpdatePosition(queen, queenCellFrom, queenCellTo);
                         if (_boardManager.IsStaleMate())
                         {
                             queen.Move(queenCellFrom);
