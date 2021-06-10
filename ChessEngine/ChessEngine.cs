@@ -113,6 +113,48 @@ namespace ChessEngineLogic
             }
         }
 
+        public void SetCurrentGame(GameModel game) 
+        {
+            CurrentGame = game;
+            SetTurn(game.Turn);
+            
+
+            foreach (var figure in game.Board)
+            {
+                CreateFigure(figure.Key, figure.Value.Substring(1, 1), figure.Value.Substring(0, 1));
+            }
+            SetHasMovedProperties(game);
+        }
+
+        public void SetHasMovedProperties(GameModel game) 
+        {
+            foreach (var figure in game.Board)
+            {
+                if (figure.Value[1] == 'P' && ((figure.Value[0] == 'W' && figure.Key[1] != '2') || (figure.Value[0] == 'B' && figure.Key[1] != '7')))
+                {
+                    _boardManager.SetFigureHasMovedProperty(figure.Key, true);
+                }
+
+                if ((figure.Value[1]== 'R' && ((figure.Value[0] == 'W' && (figure.Key != "A1" || game.MovesLog.ContainsCellFrom("A1")) 
+                                                                        && (figure.Key != "H1" || game.MovesLog.ContainsCellFrom("H1"))) 
+                                           || (figure.Value[0] == 'B' && (figure.Key != "A8" || game.MovesLog.ContainsCellFrom("A8")) 
+                                                                      && (figure.Key != "H8" || game.MovesLog.ContainsCellFrom("H8"))))))
+                    
+                {
+                    _boardManager.SetFigureHasMovedProperty(figure.Key, true);
+                }
+
+                if (figure.Value[1] == 'K' && (figure.Value[0] == 'W' && (figure.Key != "E1" || game.MovesLog.ContainsCellFrom("E1"))
+                                           || (figure.Value[0] == 'B' && (figure.Key != "E8" || game.MovesLog.ContainsCellFrom("E8")))))
+
+                {
+                    _boardManager.SetFigureHasMovedProperty(figure.Key, true);
+                }
+
+            }
+            var board = _boardManager.GetBoard();
+        }
+
         public void SetGame(int gamechoice = 1)
         {
             CurrentGame = new GameModel { StartDate = DateTime.Now };

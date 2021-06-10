@@ -57,7 +57,10 @@
     <None Remove="SetDefault.png" />
     <None Remove="Start.png" />
     <None Remove="WP.png" />
+    <None Remove="YB.png" />
+    <None Remove="YN.png" />
     <None Remove="YQ.png" />
+    <None Remove="YR.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -191,7 +194,16 @@
     <Resource Include="SetDefault.png" />
     <Resource Include="Start.png" />
     <Resource Include="WP.png" />
+    <Resource Include="YB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="YN.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="YQ.png" />
+    <Resource Include="YR.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

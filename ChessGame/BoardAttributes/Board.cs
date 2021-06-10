@@ -39,12 +39,13 @@ namespace ChessGame
         public bool Add(Cell cell, Figure value)
         {
             string key = cell.ToString();
-            if (_board.ContainsKey(key))
-            {
-                return false;
-            }
+            //if (_board.ContainsKey(key))
+            //{
+            //    return false;
+            //}
 
-            _board.Add(key, value);
+            //_board.Add(key, value);
+            _board[key] = value;
             return true;
         }
 

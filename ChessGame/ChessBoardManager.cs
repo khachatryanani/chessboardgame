@@ -15,7 +15,8 @@ namespace ChessGame
 
         private Figure _lastMoved;
 
-       
+        public bool IsPawnUpgradePossible { get; set; }
+
 
         public ChessBoardManager(bool turn = true)
         {
@@ -23,7 +24,7 @@ namespace ChessGame
             _turn = turn;
         }
 
-        public void ChangeTurn() 
+        public void ChangeTurn()
         {
             this._turn = !_turn;
         }
@@ -34,7 +35,7 @@ namespace ChessGame
             OnFigureMoved(figure, cellFrom, beatenFigure);
         }
 
-        public void MoveFigure(string cellFrom, string cellTo) 
+        public void MoveFigure(string cellFrom, string cellTo)
         {
             var figure = GetFigureByCell(cellFrom);
             figure.Move(new Cell(cellTo));
@@ -62,8 +63,14 @@ namespace ChessGame
 
             // Add to ChessBoard
             _board.Add(cell, figure);
+            
+            if (IsPawnUpgradePossible) 
+            {
+                OnFigureMoved(figure, figure.CurrentCell, null);
+            }
         }
 
+        
         private Type GetTypeFromString(string type)
         {
             switch (type)
@@ -134,10 +141,10 @@ namespace ChessGame
             _board.Remove(oldCell);
             _board[newCell] = figure;
 
-            
+
         }
 
-        public void ResetBoard() 
+        public void ResetBoard()
         {
             _board.Clear();
         }
@@ -252,7 +259,7 @@ namespace ChessGame
             {
                 return 1;
             }
-           
+
             return 0;
         }
 
@@ -274,12 +281,14 @@ namespace ChessGame
                     possibleMoves.Add(cellToMoveL.ToString());
                 }
             }
-
+            if (cellString == "D6" && figure is Pawn) 
+            {
+            }
             if (figure is Pawn)
             {
                 foreach (var pawnCell in (figure as Pawn).MovementCells)
                 {
-                    if (figure.CurrentCell != pawnCell && IsFreeCell(pawnCell) && 
+                    if (figure.CurrentCell != pawnCell && IsFreeCell(pawnCell) &&
                         IsCheckDefenseCell(figure, pawnCell) &&
                          IsNotOpeningCheck(figure, pawnCell))
                     {
@@ -299,7 +308,7 @@ namespace ChessGame
             return possibleMoves;
         }
 
-        public Dictionary<string, string> GetBoard() 
+        public Dictionary<string, string> GetBoard()
         {
             var boardDescription = new Dictionary<string, string>();
             foreach (var figure in _board)
@@ -526,11 +535,11 @@ namespace ChessGame
                         return false;
                     }
                 }
-              
+
                 var cells = GetCheckDefenseCells(king, influencingFigure);
                 foreach (var item in _board)
                 {
-                    if (item.Color == kingColor && item != king) 
+                    if (item.Color == kingColor && item != king)
                     {
                         foreach (var cell in cells)
                         {
@@ -550,18 +559,18 @@ namespace ChessGame
 
         public bool IsStaleMate()
         {
-            if (_board.Count == 2) 
+            if (_board.Count == 2)
             {
                 bool twoKingsLeft = true;
                 foreach (var figure in _board)
                 {
-                    if (!(figure is King)) 
+                    if (!(figure is King))
                     {
                         twoKingsLeft = false;
                     }
                 }
 
-                if (twoKingsLeft) 
+                if (twoKingsLeft)
                 {
                     return true;
                 }
@@ -607,7 +616,7 @@ namespace ChessGame
 
         public bool IsShortCastelingPossible(Color turn, out Cell castelingKingCell)
         {
-            if (IsCheck()) 
+            if (IsCheck())
             {
                 castelingKingCell = null;
                 return false;
@@ -666,7 +675,7 @@ namespace ChessGame
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("A1"));
 
-                    if (!king.HasMoved && rook!=null && !rook.HasMoved)
+                    if (!king.HasMoved && rook != null && !rook.HasMoved)
                     {
                         castelingKingCell = new Cell("C1");
                         return true;
@@ -682,7 +691,7 @@ namespace ChessGame
                     var king = GetTheKing(turn);
                     var rook = GetFigureByCell(new Cell("A8"));
 
-                    if (!king.HasMoved && rook!=null && !rook.HasMoved)
+                    if (!king.HasMoved && rook != null && !rook.HasMoved)
                     {
                         castelingKingCell = new Cell("C8");
                         return true;
@@ -741,7 +750,7 @@ namespace ChessGame
                 Math.Abs(figureToMove.CurrentCell.Letter - _lastMoved.CurrentCell.Letter) == 1 && cellTo.Letter == _lastMoved.CurrentCell.Letter;
         }
 
-        private bool WasPawnEnPassentPossible(Figure figureToMove, Cell cellFrom, Cell cellTo) 
+        private bool WasPawnEnPassentPossible(Figure figureToMove, Cell cellFrom, Cell cellTo)
         {
             return figureToMove is Pawn && _lastMoved is Pawn &&
                 (_lastMoved as Pawn).MovedFirstTime &&
@@ -754,10 +763,10 @@ namespace ChessGame
 
         protected virtual void OnFigureMoved(Figure movedFigure, Cell cellFrom, Figure beatenFigure)
         {
-            
+
             int status = GetGameStatus();
             bool? winner = null;
-            if (status == 2) 
+            if (status == 2)
             {
                 winner = !_turn;
             }
@@ -768,11 +777,12 @@ namespace ChessGame
 
             IsPawnEnPassentDone(movedFigure, cellFrom, out Figure beatenPawn);
 
-            if (beatenFigure == null && beatenPawn != null) 
+            if (beatenFigure == null && beatenPawn != null)
             {
                 beatenFigure = beatenPawn;
             }
-            
+
+            IsPawnUpgradePossible = IsPawnUpgrade(movedFigure.Color);
 
             FigureMoved?.Invoke(this, new FigureMoveEventArgs
             {
@@ -783,17 +793,18 @@ namespace ChessGame
                 CellTo = movedFigure.CurrentCell.ToString(),
                 CastelingCellFrom = CastelingCellFrom,
                 CastelingCellTo = CastelingCellTo,
+                IsPawnUpgrade = IsPawnUpgradePossible,
                 GameStatus = status,
-                CurrentPlayer = _turn,
+                CurrentPlayer = IsPawnUpgradePossible ? !_turn : _turn,
                 WinnerPlayer = winner
             }) ;
 
             _lastMoved = movedFigure;
         }
 
-        private bool IsCastelingDone(Figure movedFigure, Cell cellFrom, out Cell rookCellFrom, out Cell rookCellTo) 
+        private bool IsCastelingDone(Figure movedFigure, Cell cellFrom, out Cell rookCellFrom, out Cell rookCellTo)
         {
-            if (movedFigure is King) 
+            if (movedFigure is King)
             {
                 if (movedFigure.Color == Color.Black && cellFrom.ToString() == "E8")
                 {
@@ -819,7 +830,7 @@ namespace ChessGame
                         return true;
                     }
                 }
-                else if (movedFigure.Color == Color.White && cellFrom.ToString() == "E1") 
+                else if (movedFigure.Color == Color.White && cellFrom.ToString() == "E1")
                 {
                     if (movedFigure.CurrentCell.ToString() == "G1")
                     {
@@ -828,7 +839,7 @@ namespace ChessGame
                         rookCellTo = new Cell("F1");
                         rook.Move(rookCellTo);
                         UpdateBoard(rookCellFrom, rookCellTo, out _);
-                        
+
                         return true;
                     }
 
@@ -850,9 +861,9 @@ namespace ChessGame
 
             return false;
         }
-        private bool IsPawnEnPassentDone(Figure movedFigure, Cell cellFrom, out Figure beatenPawn) 
+        private bool IsPawnEnPassentDone(Figure movedFigure, Cell cellFrom, out Figure beatenPawn)
         {
-            if (WasPawnEnPassentPossible(movedFigure, cellFrom, movedFigure.CurrentCell)) 
+            if (WasPawnEnPassentPossible(movedFigure, cellFrom, movedFigure.CurrentCell))
             {
                 beatenPawn = _lastMoved;
                 return true;
@@ -860,6 +871,25 @@ namespace ChessGame
 
             beatenPawn = null;
             return false;
+        }
+
+        private bool IsPawnUpgrade(Color colorOfPawn)
+        {
+            foreach (var figure in _board)
+            {
+                if (figure is Pawn && figure.Color == colorOfPawn && figure.CurrentCell.Number == 8)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void SetFigureHasMovedProperty(string cellString, bool hasMoved) 
+        {
+            var figure = GetFigureByCell(cellString);
+            if(figure != null)
+                figure.HasMoved = hasMoved;
         }
     }
 }

@@ -174,12 +174,7 @@ namespace KingdomChessGame_Desktop
                             LetPlayerMoveImages(PlayingWithWhites);
                         }
 
-                        if (_manager.IsPawnUpgrade(cellFrom, cellTo))
-                        {
-                            this.PawnLastCell = grid;
-                            DisplayFigureChoice(grid.Margin.Left, grid.Margin.Top);
-                            DisableBoard();
-                        }
+                       
 
                         //if (_manager.IsPawnFork(cellFrom, cellTo)) 
                         //{
@@ -187,6 +182,12 @@ namespace KingdomChessGame_Desktop
                         //    _manager.RemoveFigureImageFromBoard(imageToRemoveCell);
                         //}
                         _manager.Play(cellFrom, cellTo);
+                        if (_manager.IsPawnUpgradePossible)
+                        {
+                            this.PawnLastCell = grid;
+                            DisplayFigureChoice(grid.Margin.Left, grid.Margin.Top);
+                            DisableBoard();
+                        }
                         _manager.InsertImage(MovingImage, grid);
                         
                         UpdateGameStatusBox();
@@ -569,7 +570,7 @@ namespace KingdomChessGame_Desktop
         {
             _manager.ChangeFigure(PawnLastCell, (sender as Image).Name);
             FigureChoice.Visibility = Visibility.Hidden;
-
+            UpdateGameStatusBox();
             LetPlayerMoveImages(PlayingWithWhites);
         }
 

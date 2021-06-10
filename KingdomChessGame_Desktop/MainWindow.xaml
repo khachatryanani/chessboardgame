@@ -48,13 +48,7 @@
             <!--selection boxes-->
 
         </Grid>
-        <Grid x:Name="FigureChoice" Visibility="Hidden" VerticalAlignment="Top" HorizontalAlignment="Left" Height="134" Margin="300,140,0,0" Width="170">
-            <Image x:Name="Q" Stretch="Fill" Source="/YQ.png" Height="50" Width="50" Margin="34,1,86,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown" />
-            <Image x:Name="N" Stretch="Fill" Source="/YN.png" Height="50" Width="50" Margin="114,51,6,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
-            <Image x:Name="B" Stretch="Fill" Source="/YB.png" Height="50" Width="50" Margin="89,1,31,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
-            <Image x:Name="R" Stretch="Fill" Source="/YR.png" Height="50" Width="50" Margin="9,51,111,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
-
-        </Grid>
+        
         <Menu VerticalAlignment="Top" HorizontalAlignment="Center" Background="#EBEBEB" BorderThickness="0" Width="800" Height="30">
             <MenuItem Header="Pick Your Game" Width="161" Height="30" BorderThickness="0" FontSize="16" Click="GamePicker_Click">
                 <MenuItem Name="DefaultGame" Header="Default Game" Click="DefaultGame_Click">
@@ -108,6 +102,15 @@
             </ListView>
             <Button Content="Continue" Name="ContinueBtn" HorizontalAlignment="Left" Height="23" Margin="438,54,0,0" VerticalAlignment="Top" Width="103" Click="ContinueBtn_Click"/>
             <Button Content="View on Board" x:Name="View" HorizontalAlignment="Left" Height="23" Margin="550,54,0,0" VerticalAlignment="Top" Width="103"/>
+        </Grid>
+
+        <Grid x:Name="FigureChoice" Visibility="Hidden" VerticalAlignment="Top" HorizontalAlignment="Left" Height="134" Margin="300,140,0,0" Width="170">
+            <Image x:Name="N" Stretch="Fill" Source="/YN.png" Height="50" Width="50" Margin="114,51,6,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
+            <Image x:Name="Q" Stretch="Fill" Source="/YQ.png" Height="50" Width="50" Margin="34,1,86,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown" />
+            
+            <Image x:Name="B" Stretch="Fill" Source="/YB.png" Height="50" Width="50" Margin="89,1,31,83" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
+            <Image x:Name="R" Stretch="Fill" Source="/YR.png" Height="50" Width="50" Margin="9,51,111,33" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseDown="Image_MouseDown"/>
+
         </Grid>
     </Grid>
 </Window>

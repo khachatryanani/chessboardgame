@@ -27,6 +27,8 @@ namespace KingdomChessGame_Desktop
 
         private List<string> _possibleMovesForSelectedFigure;
 
+        public bool IsPawnUpgradePossible { get; set; }
+
         /// <summary>
         /// Predefined colors for board cells on UI
         /// </summary>
@@ -92,13 +94,8 @@ namespace KingdomChessGame_Desktop
             _engine = new ChessEngine();
             _engine.GameEvent += FigureMove;
 
-            _engine.CurrentGame = _mapper.Map<GameModel>(game);
-            _engine.SetTurn(game.Turn == game.White.Name);
-
-            foreach (var figure in game.Board)
-            {
-                CreateFigure(figure.Key, figure.Value.Substring(1, 1), figure.Value.Substring(0, 1));
-            }
+            _engine.SetCurrentGame(_mapper.Map<GameModel>(game));
+          
         }
 
         /// <summary>
@@ -173,7 +170,13 @@ namespace KingdomChessGame_Desktop
                     beatenFigureImage.Tag = null;
                 }
             }
+            if (e.MovedFigureName == "WP" && e.CellTo == "G8") 
+            {
 
+            }
+            //If PawnUpgrade
+            IsPawnUpgradePossible = e.IsPawnUpgrade;
+          
             // Moved image
             if (!String.IsNullOrEmpty(e.MovedFigureName))
             {

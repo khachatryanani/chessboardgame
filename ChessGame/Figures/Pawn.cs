@@ -5,7 +5,7 @@ namespace ChessGame
 {
     public class Pawn : Figure
     {
-        public List<Cell> MovementCells { get; set; }
+        public List<Cell> MovementCells { get => GetMovementCells(); }
 
         public bool MovedFirstTime { get; set; }
         public Pawn(Cell cell, Color color) : base(cell, color)
@@ -14,7 +14,7 @@ namespace ChessGame
             this.Name = colorString + "P";
 
             InfluencedCells = GetInfluencedCells();
-            MovementCells = GetMovementCells();
+            //MovementCells = GetMovementCells();
         }
 
         public override void Move(Cell cell)
@@ -29,13 +29,13 @@ namespace ChessGame
             }
 
             base.Move(cell);
-            MovementCells = GetMovementCells();
+            //MovementCells = GetMovementCells();
         }
 
         public override void PhantomMove(Cell cell)
         {
             base.PhantomMove(cell);
-            MovementCells = GetMovementCells();
+            //MovementCells = GetMovementCells();
         }
 
         /// <summary>

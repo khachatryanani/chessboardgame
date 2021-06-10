@@ -19,6 +19,7 @@ namespace ChessEngineLogic
             CellTo = e.CellTo;
             CastelingCellFrom = e.CastelingCellFrom;
             CastelingCellTo = e.CastelingCellTo;
+            IsPawnUpgrade = e.IsPawnUpgrade;
             GameStatus = e.GameStatus;
             CurrentPlayer = e.CurrentPlayer;
             WinnerPlayer = e.WinnerPlayer;

@@ -30,5 +30,18 @@ namespace ChessEngineLogic
             }
            
         }
+
+        public static bool ContainsCellFrom(this List<Tuple<string,string,string>> movesLog, string cellFrom) 
+        {
+            foreach (var move in movesLog)
+            {
+                if (move.Item2 == cellFrom) 
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
