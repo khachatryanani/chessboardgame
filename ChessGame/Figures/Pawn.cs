@@ -14,7 +14,6 @@ namespace ChessGame
             this.Name = colorString + "P";
 
             InfluencedCells = GetInfluencedCells();
-            //MovementCells = GetMovementCells();
         }
 
         public override void Move(Cell cell)
@@ -29,13 +28,11 @@ namespace ChessGame
             }
 
             base.Move(cell);
-            //MovementCells = GetMovementCells();
         }
 
         public override void PhantomMove(Cell cell)
         {
             base.PhantomMove(cell);
-            //MovementCells = GetMovementCells();
         }
 
         /// <summary>
